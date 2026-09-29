@@ -1,0 +1,9 @@
+// Baixa do Maven Central as bibliotecas usadas pelo build-apk.sh (smali e apksig).
+plugins { id 'base' }
+repositories { mavenCentral() }
+configurations { tools }
+dependencies {
+    tools 'org.smali:smali:2.5.2'
+    tools 'com.android.tools.build:apksig:2.3.0'
+}
+tasks.register('copyDeps', Copy) { from configurations.tools; into '../../.tools/lib' }

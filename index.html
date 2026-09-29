@@ -67,6 +67,7 @@ nav.tabs button:focus-visible,.btn:focus-visible,input:focus-visible,select:focu
 .field label{font-size:.78rem;font-weight:600;color:var(--muted);letter-spacing:.02em}
 .field .hint{font-size:.75rem;color:var(--muted)}
 .field.wide{grid-column:1/-1}
+textarea{font:.78rem/1.4 var(--f-mono);color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:8px 9px;width:100%;resize:vertical}
 input[type=text],input[type=number],select{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%;min-width:0}
 input[type=number]{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
 input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
@@ -288,6 +289,10 @@ details summary{cursor:pointer;font-weight:600;font-size:.88rem;padding:6px 0}
       <div class="grid">
         <div class="card"><h2>F. Protocolo anestésico injetável</h2><p class="muted" style="font-size:.8rem;margin:0 0 8px">Valores para a faixa-base (até 5 kg). “Por hora” multiplica pela duração da cirurgia.</p><div id="edInj"></div></div>
         <div class="card"><h2>G. Protocolo anestésico inalatório</h2><p class="muted" style="font-size:.8rem;margin:0 0 8px">Valores para a faixa-base (até 5 kg). “Por hora” multiplica pela duração da cirurgia.</p><div id="edInal"></div></div>
+      </div>
+      <div class="card"><div class="card-head"><h2>Backup dos dados</h2><small class="muted">Use antes de trocar de aparelho ou reinstalar o app</small></div>
+        <div class="row" style="margin-bottom:8px"><button class="btn sm" id="bkGen">Gerar backup e copiar</button><button class="btn ghost sm" id="bkLoad">Restaurar do texto abaixo</button><span class="muted" id="bkMsg" style="font-size:.82rem" aria-live="polite"></span></div>
+        <textarea id="bkText" rows="4" spellcheck="false" aria-label="Texto do backup" placeholder="Toque em “Gerar backup e copiar” e guarde o texto no WhatsApp, e-mail ou bloco de notas. Para restaurar, cole o texto aqui e toque em “Restaurar do texto abaixo”."></textarea>
       </div>
     </div>
   </section>
@@ -662,6 +667,12 @@ function refreshDerived(){
 }
 function bindParams(){
   document.querySelectorAll('[data-cfg]').forEach(i=>{i.oninput=()=>{S.cfg[i.dataset.cfg]=num(i.value);save();refreshDerived();};});
+  const msg=t=>{$('#bkMsg').textContent=t;};
+  $('#bkGen').onclick=()=>{const ta=$('#bkText');ta.value=JSON.stringify({app:'vetclin-precificacao',v:1,data:S});ta.focus();ta.select();
+    const done=()=>msg('Backup copiado. Cole num lugar seguro.'),fail=()=>{try{document.execCommand('copy')?done():msg('Texto selecionado. Copie e guarde num lugar seguro.');}catch(e){msg('Texto selecionado. Copie e guarde num lugar seguro.');}};
+    try{navigator.clipboard.writeText(ta.value).then(done,fail);}catch(e){fail();}};
+  $('#bkLoad').onclick=()=>{try{const o=JSON.parse($('#bkText').value.trim());const d=o&&o.data;if(!d||!d.cfg||!d.procs||!d.prods)throw 0;
+    S=d;S.ui.tab='parametros';save();renderAll();msg('Backup restaurado.');}catch(e){msg('Não reconheci o texto. Cole o backup completo, do primeiro { ao último }.');}};
   let arm=0;$('#resetAll').onclick=e=>{if(!arm){arm=1;e.target.textContent='Clique de novo para apagar seus valores';setTimeout(()=>{arm=0;e.target.textContent='Restaurar todos os valores de exemplo';},3500);return;}
     arm=0;const tab=S.ui.tab;S=fresh();S.ui.tab=tab;save();renderAll();e.target.textContent='Restaurar todos os valores de exemplo';};
 }

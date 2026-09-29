@@ -19,3 +19,19 @@ Calculadora de precificação da clínica e farmácia veterinária VetClin. É u
 - Alerta: margem real abaixo da meta = subprecificado; lucro negativo = prejuízo
 
 Todos os números que vêm preenchidos são exemplos e devem ser substituídos pelos da VetClin.
+
+## App Android (APK)
+
+O APK pronto fica em [`dist/VetClin-Precificacao.apk`](dist/VetClin-Precificacao.apk). Ele funciona sem internet: a calculadora e as fontes vão dentro do app, e os dados ficam salvos no celular.
+
+**Instalar:** baixe o APK no celular, abra o arquivo e autorize "instalar apps desconhecidos" para o navegador ou gerenciador de arquivos quando o Android pedir. Requer Android 7.0 ou mais recente.
+
+**Backup:** em Parâmetros de custo → Backup dos dados, toque em "Gerar backup e copiar" e guarde o texto. Para restaurar, cole o texto e toque em "Restaurar do texto abaixo".
+
+**Gerar uma nova versão** depois de alterar o `index.html` (Linux, com Java 17+, Python 3 e Gradle):
+
+```bash
+KS_PASS='senha-do-keystore' KEYSTORE=/caminho/vetclin-release.p12 VERSION_CODE=2 VERSION_NAME=1.1 android/build-apk.sh
+```
+
+Use sempre o mesmo keystore e aumente o `VERSION_CODE`. Assim o Android instala a atualização por cima, sem apagar os dados. O keystore não fica no repositório, que é público.
