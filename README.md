@@ -1,37 +1,45 @@
-# Precificação VetClin
+# VetClin · Preço de Venda
 
-Calculadora de precificação da clínica e farmácia veterinária VetClin. É um único arquivo, `index.html`: abra no navegador, sem instalar nada. Os valores editados ficam salvos no próprio navegador (localStorage).
+Sistema de precificação da clínica veterinária VetClin, baseado no curso **"Como definir o preço de venda" do Sebrae**. Já vem com os custos de outubro/2026 e o faturamento da planilha `Custo_Clinica_10_26.xlsx`.
 
-## Abas
+## Downloads
 
-- **Procedimentos**: consultas, exames rápidos, vacinas, microchipagem e cirurgias. Soma a hora-clínica ou a hora-centro cirúrgico, os insumos, o protocolo anestésico (escalado pela faixa de peso), os impostos, a taxa do cartão e a margem.
-- **Farmácia & Balcão**: preço por margem de contribuição sobre o CMV (custo da NF + frete/ST + perdas), com a lista de produtos por segmento.
-- **Tabela de serviços**: todos os procedimentos de uma vez, com preço mínimo, preço sugerido e status da margem.
-- **Parâmetros de custo**: custos fixos, rateio, Simples Nacional, comissões, taxas da maquininha de 1x a 12x, metas, faixas de peso e protocolos anestésicos.
+| Plataforma | Arquivo | Como instalar |
+|---|---|---|
+| Windows 10/11 | [`dist/VetClin-Preco-de-Venda.exe`](dist/VetClin-Preco-de-Venda.exe) | Baixe e abra. Não precisa instalar. Se o Windows mostrar "O Windows protegeu o computador", clique em **Mais informações → Executar assim mesmo**. |
+| Android 7+ | [`dist/VetClin-Preco-de-Venda.apk`](dist/VetClin-Preco-de-Venda.apk) | Baixe no celular, abra o arquivo e autorize "instalar apps desconhecidos". |
+| Navegador | [`index.html`](index.html) | Abra o arquivo em qualquer navegador. |
 
-## Fórmulas
+Tudo funciona sem internet. No Windows os dados ficam em `%APPDATA%\VetClin Preco de Venda\dados.json`; no Android e no navegador ficam no próprio aparelho. Para passar os dados de um aparelho para outro, use **Custos da clínica → Backup dos dados**.
 
-- Hora-clínica = custos fixos × parcela do consultório ÷ horas clínicas/mês
-- Hora-centro cirúrgico = (custos fixos × parcela do CC + depreciação do CC) ÷ horas de CC/mês
-- Preço sugerido = custo direto ÷ (1 − imposto − taxa do cartão − comissão − rateio fixo % − margem)
-- Ponto de equilíbrio = custo direto ÷ (1 − imposto − taxa do cartão − comissão − rateio fixo %)
-- Lucro líquido real = preço × (1 − imposto − taxa − comissão − rateio fixo %) − custo direto
-- Alerta: margem real abaixo da meta = subprecificado; lucro negativo = prejuízo
+## Seções
 
-Todos os números que vêm preenchidos são exemplos e devem ser substituídos pelos da VetClin.
+- **Produtos**: preço sugerido de cada produto da farmácia, a partir do custo da nota fiscal. Mostra o preço mínimo (lucro zero), o markup e se o preço praticado hoje dá lucro.
+- **Serviços**: consultas, exames, cirurgias e internações. O preço considera o tempo da equipe, os materiais e os serviços de terceiros.
+- **Notas de entrada**: lançamento das notas fiscais de compra. Frete, ST/IPI e desconto são rateados entre os itens, e o item pode ser fracionado (ex.: caixa com 10 blisters vendidos soltos). No Windows e no navegador também dá para importar o XML da NF-e.
+- **Custos da clínica**: custos do mês (pode colar do Excel), parâmetros (impostos, cartão, divisão dos custos fixos) e indicadores: peso dos custos fixos, ponto de equilíbrio e margem de segurança.
 
-## App Android (APK)
+A margem de lucro é editável por seção (padrão: 15% em produtos e 20% em serviços) e também por item.
 
-O APK pronto fica em [`dist/VetClin-Precificacao.apk`](dist/VetClin-Precificacao.apk). Ele funciona sem internet: a calculadora e as fontes vão dentro do app, e os dados ficam salvos no celular.
+## Fórmulas (Sebrae)
 
-**Instalar:** baixe o APK no celular, abra o arquivo e autorize "instalar apps desconhecidos" para o navegador ou gerenciador de arquivos quando o Android pedir. Requer Android 7.0 ou mais recente.
+- **Produtos (comércio)**: Preço = Custo total ÷ (1 − (custos fixos % + impostos % + cartão % + lucro %))
+  - Custo total = custo unitário da NF (com frete e despesas rateados) × (1 + perdas %)
+  - Custos fixos % = custos fixos atribuídos aos produtos ÷ faturamento de produtos
+- **Serviços**: Preço = Custo total ÷ (1 − (lucro % + impostos % + cartão %))
+  - Custo total = materiais + terceiros + minutos × custo do minuto
+  - Custo do minuto = custos fixos atribuídos aos serviços ÷ minutos atendidos no mês (tempo × quantidade de cada serviço)
+- **Margem de contribuição** = preço − custos variáveis. **Ponto de equilíbrio** = custos fixos ÷ margem de contribuição %.
 
-**Backup:** em Parâmetros de custo → Backup dos dados, toque em "Gerar backup e copiar" e guarde o texto. Para restaurar, cole o texto e toque em "Restaurar do texto abaixo".
+Compras de mercadoria **não** entram nos custos fixos: o custo delas chega pelo preço de compra de cada produto. Empréstimos e pró-labore entram como custo fixo.
 
-**Gerar uma nova versão** depois de alterar o `index.html` (Linux, com Java 17+, Python 3 e Gradle):
+## Gerar novas versões
+
+Depois de alterar o `index.html`:
 
 ```bash
-KS_PASS='senha-do-keystore' KEYSTORE=/caminho/vetclin-release.p12 VERSION_CODE=2 VERSION_NAME=1.1 android/build-apk.sh
+windows/build-exe.sh                                   # precisa de Go e Python com Pillow
+KS_PASS='senha' KEYSTORE=/caminho/vetclin-release.p12 VERSION_CODE=2 VERSION_NAME=2.1 android/build-apk.sh
 ```
 
-Use sempre o mesmo keystore e aumente o `VERSION_CODE`. Assim o Android instala a atualização por cima, sem apagar os dados. O keystore não fica no repositório, que é público.
+No Android, use sempre o mesmo keystore e aumente o `VERSION_CODE`. Assim a atualização instala por cima sem apagar os dados. O keystore não fica no repositório.

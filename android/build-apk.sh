@@ -15,7 +15,7 @@ KS_PASS=${KS_PASS:?Defina KS_PASS com a senha do keystore}
 ALIAS=vetclin
 VERSION_CODE=${VERSION_CODE:-1}
 VERSION_NAME=${VERSION_NAME:-1.0}
-OUT=../dist/VetClin-Precificacao.apk
+OUT=../dist/VetClin-Preco-de-Venda.apk
 
 mkdir -p "$T" "$B" ../dist
 
@@ -27,16 +27,15 @@ fi
 [ -d "$T/lib" ] || (cd tools/deps && gradle -q copyDeps --no-daemon)
 CP=$(ls "$T"/lib/*.jar | tr '\n' ':')
 
-# 2. Conteúdo web, com as fontes embutidas para funcionar sem internet
+# 2. Conteúdo web (o app usa fontes do sistema, então funciona sem internet)
 rm -rf "$B"/*
-mkdir -p "$B/assets/fonts"
-cp fonts/*.woff2 fonts/fonts.css "$B/assets/fonts/"
+mkdir -p "$B/assets"
 python3 - "$B/assets/index.html" <<'PY'
-import re, sys
+import sys
 html = open('../index.html', encoding='utf-8').read()
-html = re.sub(r'<link rel="preconnect"[^>]*>\n', '', html)
-html, n = re.subn(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^>]*>', '<link rel="stylesheet" href="fonts/fonts.css">', html)
-assert n == 1, 'link do Google Fonts não encontrado no index.html'
+tag = "<script>window.VC_PLATFORM='android'</script>\n<script>\n'use strict';"
+assert html.count("<script>\n'use strict';") == 1
+html = html.replace("<script>\n'use strict';", tag, 1)
 open(sys.argv[1], 'w', encoding='utf-8').write(html)
 PY
 

@@ -3,697 +3,1055 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<!-- ARTIFACT:START -->
-<title>Precificação VetClin</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<title>VetClin Preço de Venda</title>
 <style>
-/* Layout: prancheta clínica — entradas à esquerda, laudo de preço fixo à direita; tabelas largas rolam dentro do próprio cartão */
 :root{
-  --bg:#eef3f1; --surface:#ffffff; --surface-2:#f5f8f7; --ink:#15211e; --muted:#5a6b66; --line:#d3dfdb;
+  --bg:#eff4f2; --surface:#ffffff; --surface-2:#f5f8f7; --ink:#15211e; --muted:#5a6b66; --line:#d3dfdb;
   --accent:#0d6b59; --accent-ink:#ffffff; --accent-soft:#d9eee8;
   --ok:#1d7a3c; --ok-soft:#dff2e5; --warn:#9a5b00; --warn-soft:#fbeed6; --bad:#b0261d; --bad-soft:#fbe1de;
-  --c1:#0d6b59; --c2:#4f8fb8; --c3:#c28a2c; --c4:#9a6bb0; --c5:#8a9a95; --c6:#2fa36b;
-  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
-  --f-body:"Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
-  --f-mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --s-custo:#93a39e; --s-fixo:#4f8fb8; --s-imp:#c28a2c; --s-taxa:#9a6bb0; --s-lucro:#1f8f62;
+  --f-body:"Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  --f-mono:ui-monospace, "Cascadia Mono", Consolas, "Roboto Mono", Menlo, monospace;
   --r:10px;
 }
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#0e1513; --surface:#151f1c; --surface-2:#1b2724; --ink:#e3ebe8; --muted:#94a6a0; --line:#2a3834;
   --accent:#4cc2a4; --accent-ink:#06201a; --accent-soft:#17382f;
   --ok:#62cf88; --ok-soft:#173222; --warn:#e7a843; --warn-soft:#3a2b10; --bad:#f07d73; --bad-soft:#3d1a17;
-  --c1:#4cc2a4; --c2:#79b3dc; --c3:#e0b058; --c4:#c09ad4; --c5:#7c8d88; --c6:#5fd197;
+  --s-custo:#6d7d78; --s-fixo:#79b3dc; --s-imp:#e0b058; --s-taxa:#c09ad4; --s-lucro:#4cc28a;
   color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#0e1513; --surface:#151f1c; --surface-2:#1b2724; --ink:#e3ebe8; --muted:#94a6a0; --line:#2a3834;
   --accent:#4cc2a4; --accent-ink:#06201a; --accent-soft:#17382f;
   --ok:#62cf88; --ok-soft:#173222; --warn:#e7a843; --warn-soft:#3a2b10; --bad:#f07d73; --bad-soft:#3d1a17;
-  --c1:#4cc2a4; --c2:#79b3dc; --c3:#e0b058; --c4:#c09ad4; --c5:#7c8d88; --c6:#5fd197;
+  --s-custo:#6d7d78; --s-fixo:#79b3dc; --s-imp:#e0b058; --s-taxa:#c09ad4; --s-lucro:#4cc28a;
   color-scheme:dark }
 
 *{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
 body{background:var(--bg);color:var(--ink);font:15px/1.5 var(--f-body);margin:0}
-.wrap{max-width:1240px;margin:0 auto;padding:20px 16px 48px}
-h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
-h1{font-size:1.7rem;font-weight:700;letter-spacing:-.01em}
-h2{font-size:1.15rem;font-weight:700}
-h3{font-size:.8rem;font-family:var(--f-body);font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
-.num,.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.wrap{max-width:1240px;margin:0 auto;padding:16px 16px 56px}
+h1,h2,h3{margin:0;line-height:1.2;text-wrap:balance}
+h1{font-size:1.45rem;font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.05rem;font-weight:700}
+h3{font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 .muted{color:var(--muted)}
-small{font-size:.8rem}
+small,.small{font-size:.8rem}
 
-header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;padding-bottom:16px;border-bottom:1px solid var(--line)}
-.brand{display:flex;align-items:center;gap:12px}
+header.top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 20px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
 .brand svg{width:40px;height:40px;flex:none}
-.brand p{margin:2px 0 0;color:var(--muted);font-size:.88rem}
-nav.tabs{display:flex;flex-wrap:wrap;gap:4px;margin:16px 0 20px}
-nav.tabs button{font:600 .9rem var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer}
+.brand p{color:var(--muted);font-size:.85rem}
+.saved{font-size:.8rem;color:var(--muted)}
+nav.tabs{display:flex;gap:4px;margin:14px 0 16px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+nav.tabs button{flex:none;font:600 .9rem var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:8px 14px;border-radius:999px;cursor:pointer}
 nav.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-nav.tabs button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
-.note{font-size:.85rem;color:var(--muted);background:var(--surface-2);border:1px dashed var(--line);border-radius:var(--r);padding:8px 12px}
-
-.grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:start}
-@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
-.stack{display:flex;flex-direction:column;gap:16px;min-width:0}
+.grid2{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;align-items:start;margin-bottom:16px}
+@media (max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;min-width:0}
-.card > h2{margin-bottom:12px}
-.card-head{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:12px}
+.card + .card{margin-top:16px}
+.card-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;margin-bottom:12px}
+.how p + p{margin-top:8px}
+.how p{font-size:.88rem;color:var(--muted)}
+.how b{color:var(--ink)}
+.formula{font-weight:600;color:var(--ink);background:var(--surface-2);border-left:3px solid var(--accent);padding:6px 10px;border-radius:0 6px 6px 0;margin:8px 0;font-size:.9rem}
 
-.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
 .field{display:flex;flex-direction:column;gap:4px;min-width:0}
-.field label{font-size:.78rem;font-weight:600;color:var(--muted);letter-spacing:.02em}
+.field label{font-size:.78rem;font-weight:600;color:var(--muted)}
 .field .hint{font-size:.75rem;color:var(--muted)}
 .field.wide{grid-column:1/-1}
-textarea{font:.78rem/1.4 var(--f-mono);color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:8px 9px;width:100%;resize:vertical}
-input[type=text],input[type=number],select{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%;min-width:0}
-input[type=number]{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
-input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px}
+input[type=text],input[type=date],select,textarea{font:inherit;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:7px;padding:7px 9px;width:100%;min-width:0}
+input.n{font-variant-numeric:tabular-nums;text-align:right}
+textarea{font:.78rem/1.4 var(--f-mono);resize:vertical}
+input[type=checkbox]{accent-color:var(--accent);width:16px;height:16px;margin:0}
 .affix{display:flex;align-items:stretch}
 .affix span{display:flex;align-items:center;padding:0 8px;border:1px solid var(--line);background:var(--surface);color:var(--muted);font-size:.8rem}
 .affix span:first-child{border-radius:7px 0 0 7px;border-right:0}
 .affix span:last-child{border-radius:0 7px 7px 0;border-left:0}
 .affix input{border-radius:0}
+.affix span:first-child + input:last-child{border-radius:0 7px 7px 0}
 .affix input:first-child{border-radius:7px 0 0 7px}
-.affix span:first-child + input{border-radius:0 7px 7px 0}
+.check{display:flex;align-items:center;gap:8px;font-size:.85rem}
 
-.btn{font:600 .85rem var(--f-body);border-radius:7px;padding:8px 12px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
+.btn{font:600 .85rem var(--f-body);border-radius:7px;padding:8px 12px;cursor:pointer;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);white-space:nowrap}
 .btn.ghost{background:transparent;color:var(--accent)}
 .btn.sm{padding:5px 10px;font-size:.8rem}
 .btn.danger{border-color:var(--bad);color:var(--bad);background:transparent}
+.btn.danger.armed{background:var(--bad);color:#fff}
+.icon-btn{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:1.1rem;line-height:1;padding:4px 8px;border-radius:6px}
+.icon-btn:hover{background:var(--surface-2);color:var(--bad)}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.spacer{flex:1}
 
-.tbl-wrap{overflow-x:auto;margin:0 -4px;padding:0 4px}
-table{border-collapse:collapse;width:100%;font-size:.86rem}
-th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;text-align:left;padding:6px 6px;border-bottom:1px solid var(--line);white-space:nowrap}
-td{padding:4px 6px;border-bottom:1px solid var(--line);vertical-align:middle}
-td.num,th.num{text-align:right;white-space:nowrap}
-td.c,th.c{text-align:center}
-table.ed input[type=number]{width:92px;padding:5px 7px}
-table.ed input[type=text]{min-width:150px;padding:5px 7px}
-table.ed select{padding:5px 7px;min-width:130px}
-.x{border:0;background:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:2px 6px;border-radius:5px}
-.x:hover{color:var(--bad);background:var(--bad-soft)}
-tr.group td{background:var(--surface-2);font-weight:600;font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
-tr.ro td{color:var(--muted)}
-tbody tr.clickable{cursor:pointer}
-tbody tr.clickable:hover td{background:var(--surface-2)}
+.pill{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.st-ok{background:var(--ok-soft);color:var(--ok)}
+.st-abaixo,.st-alta{background:var(--warn-soft);color:var(--warn)}
+.st-prejuizo,.st-baixa{background:var(--bad-soft);color:var(--bad)}
+.st-semcusto,.st-semprec{background:var(--surface-2);color:var(--muted);border:1px solid var(--line)}
+.badge{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:1px 6px;border-radius:4px;background:var(--warn-soft);color:var(--warn);margin-left:6px;vertical-align:1px}
 
-/* Laudo de preço */
-.result{position:sticky;top:calc(env(safe-area-inset-top,0px) + 12px)}
-.hero-price{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-bottom:14px;border-bottom:1px solid var(--line)}
-.hero-price .lbl{font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:600}
-.hero-price .big{font:700 2rem/1.1 var(--f-display);font-variant-numeric:tabular-nums;margin-top:4px}
-.hero-price .mid{font:700 1.35rem/1.15 var(--f-display);font-variant-numeric:tabular-nums;margin-top:4px}
-.hero-price .sub{font-size:.8rem;color:var(--muted)}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin:14px 0}
-.stat{background:var(--surface);padding:10px 12px}
-.stat .lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-.stat .val{font:600 1.05rem var(--f-mono);font-variant-numeric:tabular-nums;margin-top:2px}
-.stat .sub{font-size:.75rem;color:var(--muted)}
-.alert{border-radius:8px;padding:10px 12px;display:flex;gap:10px;align-items:flex-start;font-size:.88rem}
-.alert b{display:block;font-size:.95rem}
-.alert .dot{width:10px;height:10px;border-radius:50%;margin-top:6px;flex:none}
-.alert.ok{background:var(--ok-soft);color:var(--ok)} .alert.ok .dot{background:var(--ok)}
-.alert.warn{background:var(--warn-soft);color:var(--warn)} .alert.warn .dot{background:var(--warn)}
-.alert.bad{background:var(--bad-soft);color:var(--bad)} .alert.bad .dot{background:var(--bad)}
-.alert span{color:var(--ink)}
-.bar{display:flex;height:14px;border-radius:4px;overflow:hidden;margin:6px 0 8px;background:var(--surface-2)}
-.bar i{display:block;height:100%}
-.legend{display:grid;grid-template-columns:1fr 1fr;gap:3px 14px;font-size:.78rem}
-.legend div{display:flex;align-items:center;gap:6px;min-width:0}
-.legend i{width:9px;height:9px;border-radius:2px;flex:none}
-.legend span:last-child{margin-left:auto;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
-.pill{display:inline-block;font-size:.72rem;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
-.pill.ok{background:var(--ok-soft);color:var(--ok)} .pill.warn{background:var(--warn-soft);color:var(--warn)} .pill.bad{background:var(--bad-soft);color:var(--bad)} .pill.na{background:var(--surface-2);color:var(--muted)}
-td.st-ok{color:var(--ok)} td.st-warn{color:var(--warn)} td.st-bad{color:var(--bad)}
-details summary{cursor:pointer;font-weight:600;font-size:.88rem;padding:6px 0}
-.kv{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
-.kv div{background:var(--surface-2);border-radius:8px;padding:10px 12px}
-.kv .lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
-.kv .val{font:600 1.15rem var(--f-mono);font-variant-numeric:tabular-nums}
-.formula{font-family:var(--f-mono);font-size:.8rem;background:var(--surface-2);border-radius:7px;padding:8px 10px;overflow-x:auto;white-space:nowrap}
-.cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px}
-.cardgrid .field label{text-align:center}
-.cardgrid input{text-align:center;padding:6px 4px}
-.err{color:var(--bad);font-weight:600}
-@media (max-width:520px){ .hero-price{grid-template-columns:1fr} .legend{grid-template-columns:1fr} h1{font-size:1.4rem} }
-@media (prefers-reduced-motion:no-preference){ .bar i{transition:width .25s ease} }
+.big{font-size:1.9rem;font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:14px}
+.kpi{background:var(--surface-2);border-radius:8px;padding:10px 12px}
+.kpi .v{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:.75rem;color:var(--muted)}
+.kpi.bad .v{color:var(--bad)} .kpi.warn .v{color:var(--warn)} .kpi.ok .v{color:var(--ok)}
+
+.bar{display:flex;height:14px;border-radius:7px;overflow:hidden;margin:12px 0 8px;background:var(--surface-2)}
+.bar span{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.toolbar input[type=text]{max-width:280px}
+.toolbar select{width:auto}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font:600 .78rem var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:5px 10px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent-soft);color:var(--ink);border-color:var(--accent)}
+
+.tbl-wrap{overflow-x:auto;margin:0 -16px;padding:0 16px}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:700;text-align:left;padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:8px;border-bottom:1px solid var(--line);vertical-align:middle}
+th.r,td.r{text-align:right}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover td{background:var(--surface-2)}
+td small{display:block;color:var(--muted);font-size:.75rem}
+td.name{min-width:200px;max-width:380px}
+td .sug{font-weight:700;color:var(--accent)}
+.empty{padding:28px 8px;text-align:center;color:var(--muted)}
+
+.modal{position:fixed;inset:0;background:rgba(10,20,18,.5);display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow-y:auto;z-index:10}
+.modal[hidden]{display:none}
+.sheet{background:var(--surface);border-radius:12px;width:100%;max-width:760px;padding:18px;box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.sheet header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px}
+.sheet footer{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+@media (max-width:600px){.modal{padding:0}.sheet{border-radius:0;min-height:100%}}
+.result{margin-top:16px;background:var(--surface-2);border-radius:10px;padding:14px}
+.result .lines{display:grid;grid-template-columns:1fr auto;gap:4px 16px;font-size:.88rem;margin-top:10px}
+.result .lines .tot{font-weight:700;border-top:1px solid var(--line);padding-top:4px}
+.result .lines .num{text-align:right}
+.res-head{display:flex;flex-wrap:wrap;gap:16px 28px;align-items:flex-end}
+.res-head .l{font-size:.75rem;color:var(--muted)}
+.sub{margin-top:16px}
+.sub h3{margin-bottom:8px}
+.lines-tbl td{padding:5px 4px}
+.lines-tbl input{padding:5px 7px}
+.msg{font-size:.85rem;margin-top:8px;min-height:1.2em}
+.msg.ok{color:var(--ok)} .msg.bad{color:var(--bad)}
+.alert{border-radius:8px;padding:10px 12px;font-size:.88rem;margin-top:12px}
+.alert.bad{background:var(--bad-soft);color:var(--ink);border-left:4px solid var(--bad)}
+.alert.warn{background:var(--warn-soft);color:var(--ink);border-left:4px solid var(--warn)}
+.alert.ok{background:var(--ok-soft);color:var(--ink);border-left:4px solid var(--ok)}
+.nf-list .nf{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.nf-list .nf:last-child{border-bottom:0}
+.hide-android{} body.android .hide-android{display:none}
+@media print{nav.tabs,.toolbar,.btn{display:none}}
 </style>
-<!-- ARTIFACT:HEAD-END -->
 </head>
 <body>
-<!-- ARTIFACT:BODY-START -->
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="10" fill="var(--accent)"/><g fill="var(--accent-ink)"><ellipse cx="20" cy="25.5" rx="7" ry="5.8"/><ellipse cx="11.5" cy="17.5" rx="2.8" ry="3.6"/><ellipse cx="17" cy="12.2" rx="2.8" ry="3.8"/><ellipse cx="23" cy="12.2" rx="2.8" ry="3.8"/><ellipse cx="28.5" cy="17.5" rx="2.8" ry="3.6"/></g></svg>
-      <div><h1>Precificação VetClin</h1><p>Clínica &amp; Farmácia Veterinária · margem real, ponto de equilíbrio e preço sugerido</p></div>
+      <svg viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="12" fill="var(--accent)"/><g fill="var(--accent-ink)"><ellipse cx="16" cy="17" rx="3.6" ry="4.6"/><ellipse cx="24" cy="13.5" rx="3.6" ry="4.6"/><ellipse cx="32" cy="17" rx="3.6" ry="4.6"/><path d="M24 22c-6 0-10.5 6.5-10.5 10.5 0 3 2.3 4.5 5 4.5 2.2 0 3.4-1.2 5.5-1.2s3.3 1.2 5.5 1.2c2.7 0 5-1.5 5-4.5C34.5 28.5 30 22 24 22z"/></g></svg>
+      <div><h1>Preço de Venda · VetClin</h1><p>Precificação de produtos e serviços pelo método do Sebrae</p></div>
     </div>
-    <div class="row"><span class="muted" style="font-size:.8rem">Hora-clínica <b class="num" id="hdrClin"></b> · Hora-centro cirúrgico <b class="num" id="hdrCC"></b></span></div>
+    <span class="saved" id="saved">Carregando…</span>
   </header>
-
-  <nav class="tabs" role="tablist" aria-label="Seções">
-    <button role="tab" data-tab="procedimentos" aria-selected="true">Procedimentos</button>
-    <button role="tab" data-tab="farmacia" aria-selected="false">Farmácia &amp; Balcão</button>
-    <button role="tab" data-tab="tabela" aria-selected="false">Tabela de serviços</button>
-    <button role="tab" data-tab="parametros" aria-selected="false">Parâmetros de custo</button>
+  <nav class="tabs" role="tablist">
+    <button role="tab" data-tab="produtos" aria-selected="true">Produtos</button>
+    <button role="tab" data-tab="servicos" aria-selected="false">Serviços</button>
+    <button role="tab" data-tab="notas" aria-selected="false">Notas de entrada</button>
+    <button role="tab" data-tab="custos" aria-selected="false">Custos da clínica</button>
   </nav>
-
-  <!-- ============ PROCEDIMENTOS ============ -->
-  <section id="tab-procedimentos" role="tabpanel">
-    <div class="grid">
-      <div class="stack">
-        <div class="card">
-          <div class="card-head"><h2>Procedimento</h2>
-            <div class="row"><button class="btn ghost sm" id="procNew">+ Novo procedimento</button><button class="btn ghost sm" id="procReset">Restaurar padrão</button><button class="btn danger sm" id="procDel">Excluir</button></div></div>
-          <div class="fields">
-            <div class="field wide"><label for="procSel">Procedimento cadastrado</label><select id="procSel"></select></div>
-            <div class="field"><label for="procNome">Nome</label><input type="text" id="procNome"></div>
-            <div class="field"><label for="procCat">Segmento</label><select id="procCat"></select></div>
-            <div class="field"><label for="procSala">Onde é realizado</label><select id="procSala"><option value="clin">Consultório (hora-clínica)</option><option value="cc">Centro cirúrgico (hora-CC)</option></select></div>
-            <div class="field"><label for="procMin">Tempo de atendimento</label><div class="affix"><input type="number" id="procMin" min="0" step="5"><span>min</span></div></div>
-          </div>
-          <div class="fields" id="cirFields" style="margin-top:12px">
-            <div class="field"><label for="procFaixa">Faixa de peso do paciente</label><select id="procFaixa"></select></div>
-            <div class="field"><label for="procProt">Protocolo anestésico</label><select id="procProt"><option value="nenhum">Sem anestesia</option><option value="inj">Injetável (TIVA)</option><option value="inal">Inalatória (isoflurano)</option></select></div>
-            <div class="field"><label for="procEscT">Tempo cresce com o porte?</label><select id="procEscT"><option value="1">Sim, aplicar fator de tempo</option><option value="0">Não, tempo fixo</option></select></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-head"><h2>Insumos e materiais gastos</h2><small class="muted">“× peso” multiplica a quantidade pelo fator da faixa de peso</small></div>
-          <div id="procRows"></div>
-          <div id="procAnest" style="margin-top:14px"></div>
-        </div>
-
-        <div class="card">
-          <h2>Meta e preço praticado</h2>
-          <div class="fields">
-            <div class="field"><label for="procMargem">Margem de lucro desejada</label><div class="affix"><input type="number" id="procMargem" step="0.5"><span>%</span></div><span class="hint">Meta configurada: <b id="procMeta"></b></span></div>
-            <div class="field"><label for="procAtual">Preço que você cobra hoje</label><div class="affix"><span>R$</span><input type="number" id="procAtual" step="0.01" min="0"></div><span class="hint">Deixe 0 para avaliar só o sugerido</span></div>
-            <div class="field"><label for="procPay">Parcelamento para análise</label><select id="procPay"></select></div>
-          </div>
-        </div>
-      </div>
-      <aside class="card result" id="procResult" aria-live="polite"></aside>
-    </div>
-  </section>
-
-  <!-- ============ FARMÁCIA ============ -->
-  <section id="tab-farmacia" role="tabpanel" hidden>
-    <div class="grid">
-      <div class="stack">
-        <div class="card">
-          <div class="card-head"><h2>Produto</h2><small class="muted">Clique numa linha da lista abaixo para abrir aqui</small></div>
-          <div class="fields">
-            <div class="field wide"><label for="prNome">Produto</label><input type="text" id="prNome"></div>
-            <div class="field"><label for="prSeg">Segmento</label><select id="prSeg"></select></div>
-            <div class="field"><label for="prCusto">Custo de aquisição (NF, unidade)</label><div class="affix"><span>R$</span><input type="number" id="prCusto" step="0.01" min="0"></div></div>
-            <div class="field"><label for="prFrete">Frete, ST e outros sobre compra</label><div class="affix"><input type="number" id="prFrete" step="0.5"><span>%</span></div></div>
-            <div class="field"><label for="prPerda">Perdas / vencimento</label><div class="affix"><input type="number" id="prPerda" step="0.5"><span>%</span></div></div>
-            <div class="field"><label for="prMargem">Margem de lucro desejada</label><div class="affix"><input type="number" id="prMargem" step="0.5"><span>%</span></div><span class="hint">Meta do segmento: <b id="prMeta"></b></span></div>
-            <div class="field"><label for="prAtual">Preço de venda atual</label><div class="affix"><span>R$</span><input type="number" id="prAtual" step="0.01" min="0"></div></div>
-            <div class="field"><label for="prPay">Parcelamento para análise</label><select id="prPay"></select></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="card-head"><h2>Lista de produtos</h2>
-            <div class="row"><label for="prListPay" class="muted" style="font-size:.8rem">Avaliar margem no</label><select id="prListPay" style="width:auto"></select></div></div>
-          <div id="prList"></div>
-        </div>
-      </div>
-      <aside class="card result" id="prResult" aria-live="polite"></aside>
-    </div>
-  </section>
-
-  <!-- ============ TABELA ============ -->
-  <section id="tab-tabela" role="tabpanel" hidden>
-    <div class="card">
-      <div class="card-head"><h2>Tabela de preços de serviços</h2>
-        <div class="row">
-          <label for="tbFaixa" class="muted" style="font-size:.8rem">Porte das cirurgias</label><select id="tbFaixa" style="width:auto"></select>
-          <label for="tbPay" class="muted" style="font-size:.8rem">Margem no</label><select id="tbPay" style="width:auto"></select>
-        </div></div>
-      <div id="tbHost"></div>
-      <p class="note" style="margin-top:12px">Cada linha usa a margem desejada de cada procedimento. Clique numa linha para abrir o procedimento na calculadora.</p>
-    </div>
-  </section>
-
-  <!-- ============ PARÂMETROS ============ -->
-  <section id="tab-parametros" role="tabpanel" hidden>
-    <div class="stack">
-      <div class="card">
-        <div class="card-head"><h2>Resultado do rateio</h2><div class="row"><button class="btn danger sm" id="resetAll">Restaurar todos os valores de exemplo</button></div></div>
-        <div class="kv" id="kvDerived"></div>
-        <p class="formula" style="margin-top:12px" id="fxDerived"></p>
-      </div>
-
-      <div class="grid">
-        <div class="card"><div class="card-head"><h2>A. Custos fixos mensais</h2><b class="num" id="fixTotal"></b></div><div id="edFixos"></div></div>
-        <div class="stack">
-          <div class="card"><h2>Capacidade e rateio</h2>
-            <div class="fields">
-              <div class="field"><label for="cHClin">Horas clínicas produtivas/mês</label><div class="affix"><input type="number" id="cHClin" data-cfg="hClin" step="1"><span>h</span></div><span class="hint">Consultórios × horas × dias × ocupação</span></div>
-              <div class="field"><label for="cHCC">Horas de centro cirúrgico/mês</label><div class="affix"><input type="number" id="cHCC" data-cfg="hCC" step="1"><span>h</span></div></div>
-              <div class="field"><label for="cRCC">Fixos alocados ao centro cirúrgico</label><div class="affix"><input type="number" id="cRCC" data-cfg="rCC" step="1"><span>%</span></div></div>
-              <div class="field"><label for="cRF">Fixos alocados à farmácia</label><div class="affix"><input type="number" id="cRF" data-cfg="rFarm" step="1"><span>%</span></div></div>
-              <div class="field"><label for="cFat">Faturamento mensal da farmácia</label><div class="affix"><span>R$</span><input type="number" id="cFat" data-cfg="fatFarm" step="100"></div></div>
-              <div class="field"><label for="cDep">Depreciação do centro cirúrgico/mês</label><div class="affix"><span>R$</span><input type="number" id="cDep" data-cfg="depCC" step="10"></div><span class="hint">Autoclave, foco, aparelho de anestesia, monitor</span></div>
-            </div>
-          </div>
-          <div class="card"><h2>B. Impostos e comissões</h2>
-            <div class="fields">
-              <div class="field"><label for="cImpS">Simples Nacional — serviços</label><div class="affix"><input type="number" id="cImpS" data-cfg="impServ" step="0.01"><span>%</span></div><span class="hint">Alíquota efetiva (Anexo III ou V)</span></div>
-              <div class="field"><label for="cImpP">Simples Nacional — produtos</label><div class="affix"><input type="number" id="cImpP" data-cfg="impProd" step="0.01"><span>%</span></div><span class="hint">Alíquota efetiva (Anexo I)</span></div>
-              <div class="field"><label for="cComS">Comissão — serviços</label><div class="affix"><input type="number" id="cComS" data-cfg="comServ" step="0.5"><span>%</span></div></div>
-              <div class="field"><label for="cComP">Comissão — balcão</label><div class="affix"><input type="number" id="cComP" data-cfg="comProd" step="0.5"><span>%</span></div></div>
-              <div class="field"><label for="cMetaS">Meta de margem — serviços</label><div class="affix"><input type="number" id="cMetaS" data-cfg="metaServ" step="0.5"><span>%</span></div></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="card"><h2>C. Taxas da maquininha</h2>
-        <div class="cardgrid" id="cardFees"></div>
-        <p class="hint muted" style="margin:10px 0 0;font-size:.8rem">Percentual total descontado pela adquirente em cada modalidade, já com a antecipação se você antecipa recebíveis.</p>
-      </div>
-
-      <div class="grid">
-        <div class="card"><h2>D. Segmentos da farmácia</h2><div id="edSegs"></div></div>
-        <div class="card"><h2>E. Faixas de peso</h2><div id="edFaixas"></div><p class="muted" style="font-size:.8rem;margin:8px 0 0">Fator de insumos multiplica itens marcados “× peso”. Fator de tempo multiplica a duração da cirurgia.</p></div>
-      </div>
-
-      <div class="grid">
-        <div class="card"><h2>F. Protocolo anestésico injetável</h2><p class="muted" style="font-size:.8rem;margin:0 0 8px">Valores para a faixa-base (até 5 kg). “Por hora” multiplica pela duração da cirurgia.</p><div id="edInj"></div></div>
-        <div class="card"><h2>G. Protocolo anestésico inalatório</h2><p class="muted" style="font-size:.8rem;margin:0 0 8px">Valores para a faixa-base (até 5 kg). “Por hora” multiplica pela duração da cirurgia.</p><div id="edInal"></div></div>
-      </div>
-      <div class="card"><div class="card-head"><h2>Backup dos dados</h2><small class="muted">Use antes de trocar de aparelho ou reinstalar o app</small></div>
-        <div class="row" style="margin-bottom:8px"><button class="btn sm" id="bkGen">Gerar backup e copiar</button><button class="btn ghost sm" id="bkLoad">Restaurar do texto abaixo</button><span class="muted" id="bkMsg" style="font-size:.82rem" aria-live="polite"></span></div>
-        <textarea id="bkText" rows="4" spellcheck="false" aria-label="Texto do backup" placeholder="Toque em “Gerar backup e copiar” e guarde o texto no WhatsApp, e-mail ou bloco de notas. Para restaurar, cole o texto aqui e toque em “Restaurar do texto abaixo”."></textarea>
-      </div>
-    </div>
-  </section>
-
-  <p class="note" style="margin-top:20px">Todos os custos, taxas e preços vêm preenchidos com <b>valores de exemplo</b>. Substitua pelos números da VetClin na aba Parâmetros de custo e nos insumos. As alterações ficam salvas neste navegador.</p>
+  <main id="main"></main>
 </div>
+<div class="modal" id="modal" hidden><div class="sheet" role="dialog" aria-modal="true" id="sheet"></div></div>
+<datalist id="dlProdutos"></datalist>
+<datalist id="dlForn"></datalist>
 
 <script>
-(function(){
-"use strict";
-const KEY='vetclin-precificacao-v1';
+'use strict';
+const SEED = {"custos":[{"nome":"Plantar","valor":330.09,"tipo":"mercadoria","venc":"03/10","conferir":true},{"nome":"Mercado Pago","valor":793.7,"tipo":"cartao","venc":"05/10"},{"nome":"Salário Lisa","valor":1887.36,"tipo":"fixo","venc":"05/10"},{"nome":"Casa dos Filtros","valor":128.0,"tipo":"fixo","venc":"07/10"},{"nome":"Elzineide (empréstimos)","valor":1812.0,"tipo":"divida","venc":"08/10"},{"nome":"Prevtech","valor":499.08,"tipo":"fixo","venc":"08/10","conferir":true},{"nome":"Pet Market","valor":394.42,"tipo":"mercadoria","venc":"09/10"},{"nome":"Bravtec","valor":2315.78,"tipo":"mercadoria","venc":"10/10"},{"nome":"Amoedo","valor":370.23,"tipo":"mercadoria","venc":"11/10"},{"nome":"Pet Market","valor":573.46,"tipo":"mercadoria","venc":"12/10"},{"nome":"Amoedo","valor":528.42,"tipo":"mercadoria","venc":"13/10"},{"nome":"Vieira Brasil","valor":518.65,"tipo":"mercadoria","venc":"13/10"},{"nome":"Plantar","valor":330.1,"tipo":"mercadoria","venc":"13/10","conferir":true},{"nome":"Foco In Vet","valor":416.16,"tipo":"mercadoria","venc":"14/10","conferir":true},{"nome":"Maquinário Lab","valor":1296.51,"tipo":"divida","venc":"15/10"},{"nome":"Contabilidade","valor":750.0,"tipo":"fixo","venc":"15/10"},{"nome":"Optimi","valor":860.14,"tipo":"mercadoria","venc":"15/10","conferir":true},{"nome":"Pet Market","valor":532.25,"tipo":"mercadoria","venc":"18/10"},{"nome":"Black Farma","valor":157.32,"tipo":"mercadoria","venc":"19/10"},{"nome":"FGTS + INSS","valor":694.92,"tipo":"fixo","venc":"20/10"},{"nome":"Aluguel","valor":2750.0,"tipo":"fixo","venc":"20/10"},{"nome":"Impostos Simples Nacional","valor":400.0,"tipo":"imposto","venc":"20/10"},{"nome":"Água","valor":85.0,"tipo":"fixo","venc":"20/10"},{"nome":"Energia","valor":861.72,"tipo":"fixo","venc":"21/10"},{"nome":"Birivet","valor":929.77,"tipo":"mercadoria","venc":"22/10"},{"nome":"Elenilde (empréstimos))","valor":1385.0,"tipo":"divida","venc":"22/10"},{"nome":"Amoedo","valor":296.9,"tipo":"mercadoria","venc":"26/10"},{"nome":"Amoedo","valor":528.42,"tipo":"mercadoria","venc":"26/10"},{"nome":"Foco In Vet","valor":485.6,"tipo":"mercadoria","venc":"28/10","conferir":true},{"nome":"Empréstimo Basa","valor":876.04,"tipo":"divida","venc":"28/10"},{"nome":"Internet","valor":95.0,"tipo":"fixo","venc":"30/10"},{"nome":"Amoedo","valor":370.23,"tipo":"mercadoria","venc":"30/10"},{"nome":"Advogada","valor":704.3,"tipo":"fixo","venc":"25/10"},{"nome":"Pró-labore (retirada do dono)","valor":7000,"tipo":"prolabore","conferir":true}],"servicos":[{"nome":"Cirurgia geral","min":120,"qtd":4,"insumos":[{"d":"Materiais e medicações (estimativa)","v":250}],"terceiros":0,"atual":1603.75,"est":true},{"nome":"Internação até 10 kg (diária)","min":60,"qtd":24,"insumos":[{"d":"Materiais e medicações (estimativa)","v":35}],"terceiros":0,"atual":225.0,"est":true},{"nome":"Consulta","min":30,"qtd":22,"insumos":[{"d":"Materiais e medicações (estimativa)","v":8}],"terceiros":0,"atual":154.55,"est":true},{"nome":"Consulta de emergência","min":40,"qtd":10,"insumos":[{"d":"Materiais e medicações (estimativa)","v":15}],"terceiros":0,"atual":250.0,"est":true},{"nome":"Hemograma avulso","min":15,"qtd":17,"insumos":[{"d":"Materiais e medicações (estimativa)","v":15}],"terceiros":0,"atual":90.59,"est":true},{"nome":"Perfil completo (hemograma + bioquímicos)","min":25,"qtd":4,"insumos":[{"d":"Materiais e medicações (estimativa)","v":60}],"terceiros":0,"atual":330.0,"est":true},{"nome":"Ultrassom","min":30,"qtd":4,"insumos":[{"d":"Materiais e medicações (estimativa)","v":5}],"terceiros":0,"atual":330.0,"est":true},{"nome":"Internação até 20 kg (diária)","min":75,"qtd":2,"insumos":[{"d":"Materiais e medicações (estimativa)","v":50}],"terceiros":0,"atual":300.0,"est":true},{"nome":"Castração gata (pacote)","min":90,"qtd":1,"insumos":[{"d":"Materiais e medicações (estimativa)","v":150}],"terceiros":0,"atual":550.0,"est":true},{"nome":"Aplicação de injetável simples","min":5,"qtd":11,"insumos":[{"d":"Materiais e medicações (estimativa)","v":6}],"terceiros":0,"atual":44.09,"est":true},{"nome":"Transfusão de sangue","min":90,"qtd":1,"insumos":[{"d":"Materiais e medicações (estimativa)","v":120}],"terceiros":0,"atual":400.0,"est":true},{"nome":"Castração gata","min":75,"qtd":1,"insumos":[{"d":"Materiais e medicações (estimativa)","v":120}],"terceiros":0,"atual":380.0,"est":true},{"nome":"Radiografia","min":20,"qtd":1,"insumos":[{"d":"Materiais e medicações (estimativa)","v":15}],"terceiros":0,"atual":350.0,"est":true},{"nome":"Procedimentos gerais","min":30,"qtd":1,"insumos":[{"d":"Materiais e medicações (estimativa)","v":20}],"terceiros":0,"atual":300.0,"est":true},{"nome":"PCR leishmaniose (coleta + laboratório)","min":10,"qtd":1,"insumos":[{"d":"Materiais e medicações (estimativa)","v":5}],"terceiros":150,"atual":290.0,"est":true},{"nome":"Castração gato macho","min":40,"qtd":1,"insumos":[{"d":"Materiais e medicações (estimativa)","v":60}],"terceiros":0,"atual":280.0,"est":true},{"nome":"Eutanásia até 10 kg","min":30,"qtd":1,"insumos":[{"d":"Materiais e medicações (estimativa)","v":40}],"terceiros":0,"atual":250.0,"est":true},{"nome":"Bioquímico avulso (simples)","min":15,"qtd":1,"insumos":[{"d":"Materiais e medicações (estimativa)","v":25}],"terceiros":0,"atual":240.0,"est":true},{"nome":"Descarte de corpo","min":5,"qtd":2,"insumos":[],"terceiros":25,"atual":50.0,"est":true},{"nome":"Exame parasitológico de fezes (OPG)","min":20,"qtd":1,"insumos":[{"d":"Materiais e medicações (estimativa)","v":10}],"terceiros":0,"atual":80.0,"est":true},{"nome":"Oxigenoterapia","min":15,"qtd":1,"insumos":[{"d":"Materiais e medicações (estimativa)","v":15}],"terceiros":0,"atual":40.0,"est":true},{"nome":"Teste de fluoresceína","min":5,"qtd":1,"insumos":[{"d":"Materiais e medicações (estimativa)","v":5}],"terceiros":0,"atual":15.0,"est":true}],"produtos":[{"nome":"NOBIVAC DHPPI+L 25X1 DOSES - CX","qtd":11,"atual":61.74},{"nome":"ALERE E.CANIS/ANAPLASMA AB KIT C/30 - KIT","qtd":4,"atual":150.0},{"nome":"DOXIFIN TABS DIPY 100MG - 10 BLISTER C/ 14CP - CX","qtd":7,"atual":87.0},{"nome":"SENSPERT LEISHMANIOSE","qtd":5,"atual":105.0},{"nome":"PETSPORIN 75 MG 10 X 12 COMP. HOSP.","qtd":8,"atual":60.0},{"nome":"CRONIDOR 40 MG COM X 10 IN 35 2017","qtd":2,"atual":205.0},{"nome":"VETAGLOS POMADA 20 G","qtd":5,"atual":77.75},{"nome":"DIPIRONA GOTAS DISPLAY 6X20ML","qtd":7,"atual":50.0},{"nome":"ENDOGARD 10 KG COM 2 COMP - UN","qtd":4,"atual":79.5},{"nome":"AGEMOXI CL 50MG X 10 CPO REV","qtd":3,"atual":105.0},{"nome":"KIT OTOLOGICO AURITEC + CIPRO-OTIC","qtd":2,"atual":152.5},{"nome":"AGEMOXI CL 250MG X 10 CPO REV","qtd":2,"atual":165.0},{"nome":"IMUNEES OUROFINO SNACKS - UN","qtd":2,"atual":150.0},{"nome":"MICODINE 2% SHAMPOO 225 ML","qtd":2,"atual":140.0},{"nome":"FRONTMAX 26G","qtd":1,"atual":250.0},{"nome":"FLORAFARM PRE E PROBIOTICO 14 G PET","qtd":4,"atual":52.0},{"nome":"HEMOLIPET SUSPENSAO X 30ML 604938","qtd":3,"atual":70.0},{"nome":"PHISIODERM CONDICIONADOR 250ML - UN","qtd":1,"atual":193.75},{"nome":"CISTIMICIN VET COMP X30 226642","qtd":1,"atual":210.0},{"nome":"DERMAPET CAP X 30 591260","qtd":2,"atual":95.0},{"nome":"MELLIS VET 2MG COM X 10 242554","qtd":2,"atual":90.0},{"nome":"SENSPERT PARVOVIROSE","qtd":2,"atual":90.0},{"nome":"CANIGEN R CX 10 - UN","qtd":5,"atual":35.0},{"nome":"WELLPET 100MG (4.6 A 10kg) - UN","qtd":2,"atual":88.7},{"nome":"HERBALVET TA 1000ML - UN","qtd":1,"atual":160.0},{"nome":"HEPACTIL 30","qtd":1,"atual":145.0},{"nome":"ALERE LEISHMANIOSE AC TEST KIT C/10 - DP","qtd":1,"atual":140.0},{"nome":"MELLIS VET 02 MG COM X 10 GATOS 248499","qtd":4,"atual":35.5},{"nome":"RILEXINE 300 PALATAVEL COM 140 COMP - UN","qtd":2,"atual":68.0},{"nome":"GASTROBLOCK 10MG HOSPITALAR","qtd":3,"atual":45.0},{"nome":"PREDIDERM COMP DIPY 20MG - 15 BLISTER C/10 CP - CX","qtd":2,"atual":70.0},{"nome":"EMEDRON 20 MG X 10 COM","qtd":1,"atual":145.0},{"nome":"WELLPET 400MG (20.1 a 40kg) - UN","qtd":1,"atual":128.2},{"nome":"EMEDRON 10 MG X 10 COM","qtd":1,"atual":125.0},{"nome":"TOBRASYN COLIRIO 5 ML","qtd":1,"atual":125.0},{"nome":"MELOXIFLEX 0,5 MG 10 X 5 COMP HOSP.","qtd":4,"atual":30.0},{"nome":"NOBIVAC KC 1D + DIL 5X1 DOSES - CX","qtd":1,"atual":105.0},{"nome":"SOFT CARE VETFRESH 10ML","qtd":1,"atual":100.0},{"nome":"ALERE CINOMOSE AG TEST KIT C/10 - DP","qtd":1,"atual":105.0},{"nome":"DERMAPET CAP 30","qtd":1,"atual":95.0},{"nome":"NUTRIFULL CAT 30ML","qtd":1,"atual":95.0},{"nome":"VETAGLOS POMADA 50 G","qtd":1,"atual":95.0},{"nome":"HEMOLIPET COMPRIMIDOS X 30 604933","qtd":1,"atual":103.5},{"nome":"SHIH TZU ADULT 24 1 KG - SC","qtd":1,"atual":92.9},{"nome":"ELETROLITICO PET (10x10 g)","qtd":6,"atual":15.0},{"nome":"EMETIM SOL.ORAL 60 ML -","qtd":2,"atual":45.0},{"nome":"MELOXYTRAT DISPLAY 05X10X1,0MG","qtd":2,"atual":45.0},{"nome":"MINI INDOOR ADULT 1 KG - SC","qtd":1,"atual":90.0},{"nome":"PET MILK SACHE 100G","qtd":1,"atual":90.0},{"nome":"DOXIFIN TABS DIPY 50MG - 10 BLISTER C/ 14CP - CX","qtd":2,"atual":45.0},{"nome":"TAPETE GELADO NAPI P 40x50 CM","qtd":1,"atual":90.0},{"nome":"DISPLAY SPIN PET FIT C16 UN **","qtd":5,"atual":16.8},{"nome":"MATISSE FILHOTES 2KG","qtd":1,"atual":82.0},{"nome":"ALANTOL BISNAGA 25 G","qtd":1,"atual":81.5},{"nome":"BANNI 3 GATO 090ML C / 3 FLACONETES - UN","qtd":1,"atual":80.0},{"nome":"ENTERO FORT COMP 2000 MG","qtd":3,"atual":25.0},{"nome":"BANNI 3 GATO 030ML C/ 3 FLACONETES - UN","qtd":1,"atual":71.5},{"nome":"EMEDRON 5 MG X 10 COM","qtd":1,"atual":70.0},{"nome":"PREDIDERM COMP DIPY 5MG - 15 BLISTER C/10 CP - CX","qtd":2,"atual":35.0},{"nome":"ROUPA POS C FEMININO LINHA ELASTIC CINZA T5","qtd":1,"atual":70.0},{"nome":"SANADOG 125 ML","qtd":1,"atual":70.0},{"nome":"PULVEX POUR-ON 1X1 ML - UN","qtd":1,"atual":65.0},{"nome":"DIAZIPRIM ORAL 20 ML","qtd":1,"atual":60.0},{"nome":"Vanguard HTL 5","qtd":1,"atual":59.9},{"nome":"WELLPET 45MG (2 a 4,5kg) - UN","qtd":1,"atual":59.9},{"nome":"MINI INDOOR JUNIOR 1 KG - SC","qtd":1,"atual":55.9},{"nome":"X-SMALL ADULT 1KG - SC","qtd":1,"atual":55.9},{"nome":"PETISCO CHUCHUPS MISTO C/24 UN","qtd":9,"atual":6.0},{"nome":"ENTEREX - 10 X 8 G -","qtd":2,"atual":26.0},{"nome":"BIOCANIS 14G - UN","qtd":1,"atual":50.0},{"nome":"GP SH GMT GATO AD CAR CX18X85G - CX","qtd":10,"atual":4.85},{"nome":"DOXIFIN TABS DIPY 200MG - 10 BLISTER C/ 6CP - CX","qtd":1,"atual":48.0},{"nome":"BEBEDOURO PET DRINKS ECO 300 ML ROSA","qtd":1,"atual":45.0},{"nome":"NUTRISANA GLUTAMINA 20 ML","qtd":2,"atual":22.0},{"nome":"GOLDEN CARNE FILHOTE M.B. 1KG 7897348205289","qtd":1,"atual":35.0},{"nome":"WHISKAS SH GATO AD CAST","qtd":7,"atual":5.0},{"nome":"JOGO DE COLAR ELIZABETANO DO 1 AO 10","qtd":1,"atual":34.0},{"nome":"BOLINHAS DE BORRACHA CRAVINHO POTE C/60 328","qtd":5,"atual":6.0},{"nome":"POTE LIDER BOLA CRAVO GRANDE C/12","qtd":1,"atual":27.0},{"nome":"Colar ElizaBetano","qtd":1,"atual":25.0},{"nome":"MELOXIFLEX GATOS 0,2 MG 10 X 5 CP HOSPITALAR","qtd":1,"atual":25.0},{"nome":"HEMOPET GOLD 30 ML","qtd":1,"atual":26.0},{"nome":"BRINQ RATINHO COLORIDO","qtd":2,"atual":12.0},{"nome":"DREAMIES CARNE 40G","qtd":2,"atual":10.0},{"nome":"DREAMIES SALMÃO 40G","qtd":2,"atual":10.0},{"nome":"GP SH GMT CAO FILH FRA CX18X100G - CX","qtd":4,"atual":5.0},{"nome":"MORDEDOR NAPI GALINHA GRANDE MB-002 31CM","qtd":1,"atual":20.0},{"nome":"BIFINHO BEEFPET AGRODOG CHURRASCO pct c/12X50G","qtd":3,"atual":5.0},{"nome":"JOY BEEF BACON 65G","qtd":2,"atual":7.5},{"nome":"JOY BEEF CARNE E VEGETAIS","qtd":2,"atual":7.5},{"nome":"POTE COM 30 ESCOVAS CABO LONGO CATDOG","qtd":1,"atual":10.0}],"fatServ":26255.0,"fatProd":12537.81};
+const KEY = 'vetclin-preco-venda-v2';
+const PLAT = window.VC_PLATFORM || 'web';
+if (PLAT === 'android') document.body.classList.add('android');
 
-/* ---------------- Valores de exemplo ---------------- */
-const L=(n,q,c,e)=>({n,q,c,e:!!e});
-const CATS=['Consultas & Exames Rápidos','Procedimentos Profiláticos','Cirúrgicos & Anestésicos'];
-const MAT_CIR=()=>[
-  L('Fio absorvível (poliglactina) — envelope',1,19.00),L('Fio náilon para pele — envelope',1,7.50),
-  L('Campo estéril descartável',1,8.90),L('Luvas cirúrgicas estéreis — par',2,3.80),
-  L('Lâmina de bisturi',1,0.85),L('Gaze estéril — pacote',4,1.60),
-  L('Clorexidina degermante + alcoólica',1,3.20),L('Seringas e agulhas',1,3.50),
-  L('Cateter IV + fixação',1,4.20),L('Esterilização do kit (autoclave)',1,6.00),
-  L('Antibiótico profilático',1,4.50,true),L('Analgésico/anti-inflamatório pós-op',1,5.00,true)];
-function P(cat,nome,sala,min,rows,extra){return Object.assign({id:'p'+Math.random().toString(36).slice(2,9),cat,nome,sala,min,rows,prot:'nenhum',escT:true,margem:null,atual:0},extra||{})}
-function defaultProcs(){
-  const luva=L('Luvas de procedimento — par',1,0.60), inj=()=>[L('Seringa 3 mL',1,0.45),L('Agulha',1,0.18),L('Algodão e álcool',1,0.25),L('Luvas de procedimento — par',1,0.60)];
-  const vac=(n,c,atual)=>P(CATS[1],n,'clin',15,[L('Dose da vacina',1,c),...inj(),L('Carteira/etiqueta de vacinação',1,0.40)],{atual});
-  return [
-    P(CATS[0],'Consulta de rotina','clin',30,[{...luva},L('Papel lençol',1,0.50),L('Algodão, álcool e espátula',1,0.40)],{atual:150}),
-    P(CATS[0],'Retorno','clin',15,[{...luva},L('Papel lençol',1,0.50)],{atual:0}),
-    P(CATS[0],'Aplicação de medicamento injetável','clin',10,[L('Medicamento (dose)',1,0,true),...inj()],{atual:30}),
-    P(CATS[0],'Curativo simples','clin',15,[L('Gaze — pacote',1,1.20),L('Clorexidina / soro',1,1.30),L('Atadura crepe',1,2.40),L('Esparadrapo / micropore',1,0.80),{...luva}],{atual:45}),
-    P(CATS[0],'Curativo complexo','clin',40,[L('Gaze — pacote',3,1.20),L('Soro fisiológico 250 mL',1,4.50),L('Pomada cicatrizante (dose)',1,6.00),L('Atadura crepe',3,2.40),L('Luvas de procedimento — par',2,0.60),L('Sedação leve',1,8.00,true)],{atual:120}),
-    P(CATS[0],'Glicemia capilar','clin',5,[L('Fita reagente',1,2.20),L('Lanceta',1,0.35),L('Algodão e álcool',1,0.20),{...luva}],{atual:25}),
-    P(CATS[0],'Citologia rápida','clin',20,[L('Lâminas',2,0.40),L('Corante panótico (uso)',1,1.50),L('Swab / agulha',1,0.60),{...luva}],{atual:60}),
-    P(CATS[0],'Teste rápido (FIV/FeLV, cinomose, parvo, leish)','clin',15,[L('Kit de teste rápido',1,45.00),L('Seringa 3 mL',1,0.45),L('Agulha',1,0.18),L('Tubo de coleta',1,0.90),{...luva}],{atual:110}),
-    vac('Vacina V8 / V10',38.00,90), vac('Vacina antirrábica',12.00,60), vac('Vacina Giardia',42.00,95),
-    vac('Vacina gripe canina (tosse dos canis)',45.00,100), vac('Vacina quádrupla felina (V4)',48.00,110), vac('Vacina quíntupla felina (V5)',75.00,150),
-    P(CATS[1],'Microchipagem','clin',10,[L('Microchip com aplicador',1,18.00),L('Algodão e álcool',1,0.25),{...luva},L('Cadastro em base nacional',1,0)],{atual:80}),
-    P(CATS[2],'Castração felina — macho','cc',30,[...MAT_CIR().filter(r=>!/Cateter/.test(r.n))],{prot:'inj',escT:false,atual:250}),
-    P(CATS[2],'Castração felina — fêmea','cc',60,MAT_CIR(),{prot:'inal',escT:false,atual:380}),
-    P(CATS[2],'Castração canina — macho','cc',50,MAT_CIR(),{prot:'inal',atual:450}),
-    P(CATS[2],'Castração canina — fêmea','cc',75,[...MAT_CIR(),L('Fio absorvível extra (porte)',1,19.00,true)],{prot:'inal',atual:600}),
-    P(CATS[2],'Mastectomia unilateral','cc',150,[...MAT_CIR(),L('Fio absorvível extra',2,19.00),L('Dreno de Penrose',1,6.50),L('Envio histopatológico',1,95.00),L('Roupa cirúrgica pós-op',1,24.00)],{prot:'inal',atual:1400}),
-    P(CATS[2],'Nodulectomia (remoção de nódulo)','cc',45,[...MAT_CIR(),L('Envio histopatológico',1,95.00)],{prot:'inal',escT:false,atual:550}),
-    P(CATS[2],'Sutura de ferida / laceração','cc',40,MAT_CIR(),{prot:'inj',escT:false,atual:350}),
-  ];
+/* ---------- utilidades ---------- */
+const $ = (s, el = document) => el.querySelector(s);
+const $$ = (s, el = document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+const ok = v => v != null && isFinite(v);
+const money = v => ok(v) ? BRL.format(v) : '—';
+const pct = (v, d = 1) => ok(v) ? (v * 100).toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }) + '%' : '—';
+const fmt = (v, d = 2) => ok(v) ? v.toLocaleString('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—';
+const r2 = v => Math.round(v * 100) / 100;
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const norm = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase().replace(/\s+/g, ' ').trim();
+function num(s) {
+  if (typeof s === 'number') return s;
+  s = String(s ?? '').replace(/R\$|\s|%/g, '');
+  if (!s) return NaN;
+  const c = s.lastIndexOf(','), d = s.lastIndexOf('.');
+  if (c > -1 && c > d) s = s.replace(/\./g, '').replace(',', '.');
+  else if (c > -1) s = s.replace(/,/g, '');
+  return parseFloat(s);
 }
-function defaultCfg(){return {
-  fixos:[
-    {g:'Estrutura',n:'Aluguel',v:4500},{g:'Estrutura',n:'Água',v:250},{g:'Estrutura',n:'Energia elétrica',v:950},{g:'Estrutura',n:'Internet e telefone',v:220},
-    {g:'Pessoas',n:'Folha — recepção e auxiliares',v:9800},{g:'Pessoas',n:'Encargos trabalhistas',v:3100},{g:'Pessoas',n:'Pró-labore médico-veterinário',v:10000},
-    {g:'Sistemas',n:'Sistema de gestão clínica',v:320},{g:'Sistemas',n:'Automação / WhatsApp',v:200},{g:'Sistemas',n:'Hospedagem VPS',v:120},
-    {g:'Administrativo',n:'Contabilidade',v:800},{g:'Administrativo',n:'CRMV, alvarás e licenças (anual ÷ 12)',v:160},{g:'Administrativo',n:'Tarifas bancárias e maquininha (aluguel)',v:90},
-    {g:'Depreciação',n:'Depreciação equipamentos clínicos (ultrassom etc.)',v:650}],
-  depCC:900,hClin:260,hCC:60,rCC:25,rFarm:15,fatFarm:28000,
-  impServ:6,impProd:4,comServ:0,comProd:0,metaServ:20,
-  taxas:{pix:0,deb:1.49,cred:[3.19,4.59,5.29,5.99,6.69,7.39,8.39,9.09,9.79,10.49,11.19,11.89]},
-  faixas:[{n:'Até 5 kg',fp:1,ft:1},{n:'5 a 10 kg',fp:1.6,ft:1.1},{n:'10 a 20 kg',fp:2.5,ft:1.2},{n:'20 a 30 kg',fp:3.4,ft:1.35},{n:'30 a 40 kg',fp:4.3,ft:1.5},{n:'Acima de 40 kg',fp:5.5,ft:1.7}],
-  anest:{
-    inj:[L('MPA (acepromazina + opioide)',1,6.00,true),L('Indução (propofol)',1,9.00,true),L('Manutenção TIVA (propofol/cetamina) — por hora',1,14.00,true),L('Bloqueio local (lidocaína)',1,2.50,true),L('Fluidoterapia (Ringer lactato + equipo)',1,11.00,true),L('Oxigênio suplementar',1,4.00)].map((r,i)=>(i==2?{...r,t:true}:r)),
-    inal:[L('MPA (acepromazina + opioide)',1,6.00,true),L('Indução (propofol)',1,9.00,true),L('Isoflurano + oxigênio — por hora',1,22.00,true),L('Tubo endotraqueal + circuito',1,9.00),L('Bloqueio local (lidocaína)',1,2.50,true),L('Fluidoterapia (Ringer lactato + equipo)',1,11.00,true),L('Monitoração (eletrodos, capnografia)',1,5.00)].map((r,i)=>(i==2?{...r,t:true}:r))
-  },
-  segs:[
-    {id:'s1',n:'Controlados & Antibióticos',meta:28,perda:2},
-    {id:'s2',n:'Anti-inflamatórios, Analgésicos & Corticoides',meta:32,perda:1.5},
-    {id:'s3',n:'Antiparasitários',meta:18,perda:1},
-    {id:'s4',n:'Dermocosméticos & Shampoos',meta:35,perda:1.5},
-    {id:'s5',n:'Suplementos & Rações Terapêuticas',meta:16,perda:1},
-    {id:'s6',n:'Acessórios & Consumíveis de Balcão',meta:45,perda:0.5}]
-};}
-function PR(seg,n,custo,atual){return {id:'r'+Math.random().toString(36).slice(2,9),seg,n,custo,frete:3,perda:null,margem:null,atual}}
-function defaultProds(){return [
-  PR('s1','Amoxicilina + clavulanato 250 mg — 10 comp.',38.00,62.00),PR('s1','Gabapentina 100 mg — 30 cáps. (controlado)',42.00,75.00),PR('s1','Enrofloxacino 50 mg — 10 comp.',19.50,34.00),
-  PR('s2','Meloxicam 2 mg — 10 comp.',18.00,34.00),PR('s2','Prednisolona 20 mg — 10 comp.',16.50,29.00),PR('s2','Dipirona gotas 20 mL',9.80,19.00),
-  PR('s3','Fluralaner 10–20 kg — 1 comp.',178.00,229.00),PR('s3','Sarolaner 5–10 kg — 3 comp.',118.00,159.00),PR('s3','Coleira imidacloprida/flumetrina > 8 kg',172.00,219.00),PR('s3','Pipeta antipulgas gatos',38.00,59.00),
-  PR('s4','Shampoo clorexidina 2% 230 mL',38.00,69.00),PR('s4','Hidratante / spot-on dermatológico',52.00,98.00),
-  PR('s5','Ração renal felina 1,5 kg',98.00,129.00),PR('s5','Suplemento articular 60 comp.',74.00,108.00),PR('s5','Suplemento vitamínico pasta 100 g',41.00,62.00),
-  PR('s6','Colar elizabetano nº 20',8.50,25.00),PR('s6','Roupa cirúrgica pós-op tam. M',22.00,55.00),PR('s6','Guia e peitoral',24.00,49.90)];}
+const numOrNull = s => { const n = num(s); return ok(n) ? n : null; };
+const inv = v => ok(v) ? String(r2(v)).replace('.', ',') : '';
+const today = () => new Date().toISOString().slice(0, 10);
+const dataBR = s => s ? s.split('-').reverse().join('/') : '';
 
-/* ---------------- Estado ---------------- */
-let S=load();
-function fresh(){return {cfg:defaultCfg(),procs:defaultProcs(),prods:defaultProds(),ui:{tab:'procedimentos',proc:0,faixa:0,payProc:'c3',prod:0,payProd:'c1',listPay:'pix',tbFaixa:0,tbPay:'pix'}}}
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&s.cfg&&s.procs&&s.prods)return s;}catch(e){} return fresh();}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
-
-/* ---------------- Utilidades ---------------- */
-const $=s=>document.querySelector(s);
-const num=v=>{const x=parseFloat(String(v).replace(',','.'));return isFinite(x)?x:0};
-const BRL=new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'});
-const brl=v=>isFinite(v)?BRL.format(v):'—';
-const pct=(v,d=1)=>isFinite(v)?(v*100).toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d})+'%':'—';
-const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const PAYS=[{k:'pix',l:'Pix / dinheiro'},{k:'deb',l:'Débito'}].concat(Array.from({length:12},(_,i)=>({k:'c'+(i+1),l:'Crédito '+(i+1)+'x'})));
-const payLabel=k=>(PAYS.find(p=>p.k===k)||PAYS[0]).l;
-const nParc=k=>k[0]==='c'?+k.slice(1):1;
-function fee(k){const t=S.cfg.taxas;return (k==='pix'?t.pix:k==='deb'?t.deb:t.cred[nParc(k)-1])/100}
-function fillPay(sel,val,noPix){sel.innerHTML=PAYS.filter(p=>!(noPix&&p.k==='pix')).map(p=>`<option value="${p.k}">${p.l}</option>`).join('');sel.value=val;}
-
-function derived(){
-  const c=S.cfg, F=c.fixos.reduce((a,f)=>a+num(f.v),0), rCC=num(c.rCC)/100, rF=num(c.rFarm)/100;
-  return {F,total:F+num(c.depCC),rClin:1-rCC-rF,
-    hrClin:F*(1-rCC-rF)/Math.max(num(c.hClin),1e-9),
-    hrCC:(F*rCC+num(c.depCC))/Math.max(num(c.hCC),1e-9),
-    fixFarm:num(c.fatFarm)>0?F*rF/num(c.fatFarm):0};
-}
-
-/* ---------------- Editor de tabelas ---------------- */
-function editor(host,o){
-  const cols=o.cols;
-  function cell(c,r,i,ci){
-    if(c.calc)return `<td class="num ${c.cls||''}" data-ci="${ci}"></td>`;
-    const a=`data-k="${c.k}" aria-label="${esc(c.label)}"`;
-    if(c.type==='check')return `<td class="c"><input type="checkbox" id="${host.id}-${i}-${c.k}" ${a} ${r[c.k]?'checked':''}></td>`;
-    if(c.type==='select')return `<td><select id="${host.id}-${i}-${c.k}" ${a}>${c.options().map(op=>`<option value="${op.v}" ${op.v===r[c.k]?'selected':''}>${esc(op.l)}</option>`).join('')}</select></td>`;
-    if(c.type==='num')return `<td class="num"><input type="number" id="${host.id}-${i}-${c.k}" step="${c.step||'0.01'}" value="${r[c.k]??''}" ${a}></td>`;
-    return `<td><input type="text" id="${host.id}-${i}-${c.k}" value="${esc(r[c.k])}" ${a}></td>`;
-  }
-  function render(){
-    const rows=o.rows();
-    let h=`<div class="tbl-wrap"><table class="ed"><thead><tr>${cols.map(c=>`<th class="${c.calc||c.type==='num'?'num':c.type==='check'?'c':''}">${c.label}</th>`).join('')}<th></th></tr></thead><tbody>`;
-    rows.forEach((r,i)=>{h+=`<tr data-i="${i}" class="${o.clickable?'clickable':''}">${cols.map((c,ci)=>cell(c,r,i,ci)).join('')}<td><button class="x" data-rm="${i}" aria-label="Remover linha">×</button></td></tr>`;});
-    h+=`</tbody>${o.foot?`<tfoot>${o.foot()}</tfoot>`:''}</table></div>`;
-    if(o.addLabel)h+=`<button class="btn ghost sm" data-add style="margin-top:8px">${o.addLabel}</button>`;
-    host.innerHTML=h;refresh();
-  }
-  function refresh(){const rows=o.rows();host.querySelectorAll('tr[data-i]').forEach(tr=>{const r=rows[+tr.dataset.i];tr.querySelectorAll('td[data-ci]').forEach(td=>{const c=cols[+td.dataset.ci];td.innerHTML=c.calc(r);td.className='num '+(c.cls?(typeof c.cls==='function'?c.cls(r):c.cls):'');});});
-    if(o.foot){const tf=host.querySelector('tfoot');if(tf)tf.innerHTML=o.foot();}}
-  host.oninput=e=>{const t=e.target,tr=t.closest('tr[data-i]');if(!tr||!t.dataset.k)return;const r=o.rows()[+tr.dataset.i],c=cols.find(c=>c.k===t.dataset.k);
-    r[c.k]=c.type==='check'?t.checked:c.type==='num'?(t.value===''&&c.nullable?null:num(t.value)):t.value;save();o.onChange&&o.onChange();refresh();};
-  host.onclick=e=>{const rm=e.target.closest('[data-rm]');if(rm){o.rows().splice(+rm.dataset.rm,1);save();render();o.onChange&&o.onChange();return;}
-    if(e.target.closest('[data-add]')){o.rows().push(o.newRow());save();render();o.onChange&&o.onChange();return;}
-    const tr=e.target.closest('tr[data-i]');if(o.onRowClick&&tr&&!e.target.closest('input,select,button'))o.onRowClick(+tr.dataset.i);};
-  render();return {render,refresh};
-}
-
-/* ---------------- Motor de cálculo ---------------- */
-/* Preço = Custo direto ÷ (1 − imposto − taxa do cartão − comissão − rateio fixo % − margem) */
-function engine(base){ // base: {custo, imp, com, fix, margem}
-  const v=k=>base.imp+fee(k)+base.com+base.fix;
+/* ---------- estado ---------- */
+const TIPOS = {
+  fixo: 'Custo fixo', divida: 'Empréstimo / financiamento', prolabore: 'Pró-labore',
+  mercadoria: 'Compra de mercadoria / insumo', cartao: 'Taxa de cartão / maquininha', imposto: 'Imposto', ignorar: 'Não entra no cálculo'
+};
+const FIXOS = ['fixo', 'divida', 'prolabore'];
+const VARIAVEIS = ['mercadoria', 'cartao', 'imposto'];
+const FAT0 = 34064.88;
+const sumSeed = t => SEED.custos.filter(c => c.tipo === t).reduce((a, c) => a + c.valor, 0);
+const DEFAULT_PARAMS = {
+  fat: FAT0, partProd: Math.round(SEED.fatProd / (SEED.fatProd + SEED.fatServ) * 1000) / 10, fixProd: 15,
+  impServ: 6, impProd: 6, cartao: r2(sumSeed('cartao') / FAT0 * 100), comissao: 0, perdas: 2,
+  margServ: 20, margProd: 15, arrServ: '5', arrProd: '90', horasModo: 'auto', horasManual: 80
+};
+const emptyDraft = () => ({ forn: '', num: '', data: today(), frete: null, outras: null, desc: null, itens: [{ nome: '', q: null, vu: null, fator: 1 }] });
+function fresh() {
   return {
-    varPct:v,
-    price:k=>{const d=1-v(k)-base.margem;return d>0?base.custo/d:NaN},
-    be:k=>{const d=1-v(k);return d>0?base.custo/d:NaN},
-    lucro:(P,k)=>P*(1-v(k))-base.custo,
+    v: 2, params: { ...DEFAULT_PARAMS },
+    custos: SEED.custos.map(c => ({ id: uid(), ...c })),
+    servicos: SEED.servicos.map(s => ({ id: uid(), ...s, insumos: s.insumos.map(i => ({ q: 1, ...i })) })),
+    produtos: SEED.produtos.map(p => ({ id: uid(), ...p })),
+    nfs: [], draft: emptyDraft()
   };
 }
-function statusOf(m,meta){if(!isFinite(m))return 'na';if(m<0)return 'bad';if(m<meta-1e-9)return 'warn';return 'ok';}
-const ST_TXT={ok:'Dentro da meta',warn:'Subprecificado',bad:'Prejuízo',na:'—'};
+let S;
+let saveT;
+function setSaved(t) { $('#saved').textContent = t; }
+function save() {
+  setSaved('Salvando…');
+  clearTimeout(saveT);
+  saveT = setTimeout(() => {
+    const s = JSON.stringify(S);
+    try { localStorage.setItem(KEY, s); } catch (e) { }
+    if (window.vcSave) Promise.resolve(window.vcSave(s)).then(() => setSaved('Tudo salvo'), () => setSaved('Erro ao salvar'));
+    else setSaved('Tudo salvo');
+  }, 300);
+}
+async function load() {
+  let s = null;
+  if (window.vcLoad) { try { s = await window.vcLoad(); } catch (e) { } }
+  if (!s) { try { s = localStorage.getItem(KEY); } catch (e) { } }
+  try { const o = s ? JSON.parse(s) : null; if (o && o.v === 2) return migrate(o); } catch (e) { }
+  return fresh();
+}
+function migrate(o) {
+  o.params = { ...DEFAULT_PARAMS, ...o.params };
+  o.custos ||= []; o.servicos ||= []; o.produtos ||= []; o.nfs ||= []; o.draft ||= emptyDraft();
+  return o;
+}
 
-function renderResult(host,R){
-  const E=engine(R), payK=R.payK;
-  const pPix=E.price('pix'), pSel=E.price(payK), n=nParc(payK);
-  if(!isFinite(pPix)||!isFinite(pSel)){
-    host.innerHTML=`<h2>Resultado</h2><p class="err">Impostos + taxas + comissão + margem somam 100% ou mais. Reduza a margem desejada ou revise as taxas.</p>`;return;}
-  const ref=R.atual>0?R.atual:pSel, refK=payK;
-  const lucro=E.lucro(ref,refK), m=lucro/ref, st=statusOf(m,R.meta);
-  const lucroPix=R.atual>0?E.lucro(R.atual,'pix'):E.lucro(pPix,'pix'), mPix=lucroPix/(R.atual>0?R.atual:pPix);
-  const P=pPix;
-  const parts=R.parts.concat([
-    {l:'Simples Nacional',v:P*R.imp,c:'--c3'},{l:'Taxa Pix/dinheiro',v:P*fee('pix'),c:'--c4'}]).concat(
-    R.com>0?[{l:'Comissão',v:P*R.com,c:'--c5'}]:[]).concat(R.fix>0?[{l:'Rateio de custos fixos',v:P*R.fix,c:'--c5'}]:[]).concat([{l:'Lucro líquido',v:P*R.margem,c:'--c6'}]).filter(p=>p.v>0.004);
-  const tot=parts.reduce((a,p)=>a+p.v,0)||1;
-  let alertHTML;
-  const who=R.atual>0?`O preço atual de <b class="num" style="display:inline">${brl(R.atual)}</b> no ${payLabel(refK).toLowerCase()}`:`O preço sugerido no ${payLabel(refK).toLowerCase()}`;
-  if(st==='bad')alertHTML=`<div class="alert bad"><i class="dot"></i><div><b>Prejuízo: abaixo do ponto de equilíbrio</b><span>${who} deixa ${brl(lucro)} por venda. O mínimo para empatar é ${brl(E.be(refK))}.</span></div></div>`;
-  else if(st==='warn')alertHTML=`<div class="alert warn"><i class="dot"></i><div><b>Preço subprecificado</b><span>${who} rende margem real de ${pct(m)}, abaixo da meta de ${pct(R.meta)}. Para atingir a meta, cobre ${brl(engine({...R,margem:R.meta}).price(refK))}.</span></div></div>`;
-  else alertHTML=`<div class="alert ok"><i class="dot"></i><div><b>Dentro da meta</b><span>${who} rende margem real de ${pct(m)} (meta ${pct(R.meta)}).</span></div></div>`;
-  const rows=PAYS.map(p=>{const pr=E.price(p.k),be=E.be(p.k),n=nParc(p.k);
-    const lA=R.atual>0?E.lucro(R.atual,p.k):NaN,mA=lA/R.atual,s=statusOf(mA,R.meta);
-    return `<tr${p.k===payK?' style="font-weight:600"':''}><td style="white-space:nowrap">${p.k==='pix'?'Pix':p.k==='deb'?'Débito':'Crédito '+n+'x'}</td><td class="num">${pct(fee(p.k),2)}</td><td class="num">${brl(pr)}</td><td class="num">${n>1?n+'× '+brl(pr/n):'—'}</td><td class="num">${brl(be)}</td>${R.atual>0?`<td class="num st-${s}">${pct(mA)}</td>`:''}</tr>`;}).join('');
-  host.innerHTML=`
-    <div class="card-head" style="margin-bottom:10px"><h2>${esc(R.title)}</h2><small class="muted">${esc(R.subtitle||'')}</small></div>
-    <div class="hero-price">
-      <div><div class="lbl">Preço sugerido à vista</div><div class="big">${brl(pPix)}</div><div class="sub">Pix / dinheiro · margem ${pct(R.margem)}</div></div>
-      <div><div class="lbl">${n>1?'Parcelado em '+n+'x':payLabel(payK)}</div><div class="mid">${n>1?n+'× '+brl(pSel/n):brl(pSel)}</div><div class="sub">Total ${brl(pSel)} · taxa ${pct(fee(payK),2)}</div></div>
+/* ---------- cálculos ---------- */
+function base() {
+  const P = S.params;
+  const soma = tipos => S.custos.filter(c => tipos.includes(c.tipo)).reduce((a, c) => a + (ok(c.valor) ? c.valor : 0), 0);
+  const fixos = soma(FIXOS), variaveis = soma(VARIAVEIS);
+  const fat = ok(P.fat) ? P.fat : 0;
+  const fatProd = fat * (P.partProd || 0) / 100;
+  const fixProd = fixos * (P.fixProd || 0) / 100, fixServ = fixos - fixProd;
+  const dfProd = fatProd > 0 ? fixProd / fatProd : 0;
+  const minAuto = S.servicos.reduce((a, s) => a + (s.min || 0) * (s.qtd || 0), 0);
+  const minutos = P.horasModo === 'manual' ? (P.horasManual || 0) * 60 : minAuto;
+  const custoMin = minutos > 0 ? fixServ / minutos : 0;
+  const mc = fat > 0 ? 1 - variaveis / fat : null;
+  const pe = mc > 0 ? fixos / mc : null;
+  const varProd = ((P.impProd || 0) + (P.cartao || 0) + (P.comissao || 0)) / 100;
+  const varServ = ((P.impServ || 0) + (P.cartao || 0) + (P.comissao || 0)) / 100;
+  return {
+    fixos, variaveis, fat, fatProd, fixProd, fixServ, dfProd, minAuto, minutos, custoMin, mc, pe, varProd, varServ,
+    soma: t => soma([t])
+  };
+}
+function arred(v, m) {
+  if (!ok(v) || v <= 0) return v;
+  const e = 1e-9;
+  switch (m) {
+    case '90': { let r = Math.floor(v) + 0.9; if (r < v - e) r += 1; return r2(r); }
+    case 'int': return Math.ceil(v - e);
+    case '5': return Math.ceil(v / 5 - e) * 5;
+    case '10': return Math.ceil(v / 10 - e) * 10;
+    default: return Math.ceil(v * 100 - e) / 100;
+  }
+}
+function nfCalc(nf) {
+  const linhas = nf.itens.map(i => ({ ...i, v: (ok(i.q) && ok(i.vu)) ? i.q * i.vu : 0 }));
+  const bruto = linhas.reduce((a, l) => a + l.v, 0);
+  const extra = (nf.frete || 0) + (nf.outras || 0) - (nf.desc || 0);
+  for (const l of linhas) {
+    l.r = bruto > 0 ? extra * l.v / bruto : 0;
+    l.un = l.q > 0 && l.vu > 0 ? (l.v + l.r) / (l.q * (l.fator > 0 ? l.fator : 1)) : null;
+  }
+  return { linhas, bruto, extra, total: bruto + extra };
+}
+function custosNF() {
+  const m = {};
+  const nfs = [...S.nfs].sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.criado || 0) - (b.criado || 0));
+  for (const nf of nfs) for (const l of nfCalc(nf).linhas) if (l.prod && l.un != null) (m[l.prod] ||= []).push({ un: l.un, nf, l });
+  return m;
+}
+function custoProd(p, map) {
+  const h = map[p.id];
+  if (h && !(p.manual && ok(p.custo))) { const u = h[h.length - 1]; return { v: u.un, fonte: 'nf', nf: u.nf }; }
+  if (ok(p.custo)) return { v: p.custo, fonte: 'manual' };
+  return null;
+}
+function status(lucro, alvo, temCusto, temPreco) {
+  if (!temCusto) return 'semcusto';
+  if (!temPreco) return 'semprec';
+  if (lucro < 0) return 'prejuizo';
+  if (lucro < alvo - 0.02) return 'abaixo';
+  return 'ok';
+}
+const ST_LABEL = { ok: 'Saudável', abaixo: 'Abaixo da meta', prejuizo: 'Prejuízo', semcusto: 'Sem custo', semprec: 'Sem preço atual' };
+function calcProd(p, b, map) {
+  const P = S.params;
+  const c = custoProd(p, map);
+  const marg = (ok(p.marg) ? p.marg : P.margProd) / 100;
+  const perdas = (ok(p.perdas) ? p.perdas : P.perdas) / 100;
+  const ct = c ? c.v * (1 + perdas) : null;
+  const div = 1 - (b.varProd + b.dfProd + marg), divMin = 1 - (b.varProd + b.dfProd);
+  const sugBruto = ct != null && div > 0 ? ct / div : null;
+  const sug = arred(sugBruto, P.arrProd);
+  const min = ct != null && divMin > 0 ? ct / divMin : null;
+  const lucroAtual = ct != null && p.atual > 0 ? 1 - ct / p.atual - b.varProd - b.dfProd : null;
+  const lucroSug = ct != null && sug > 0 ? 1 - ct / sug - b.varProd - b.dfProd : null;
+  return { c, ct, marg, perdas, div, sug, min, markup: div > 0 ? 1 / div : null, lucroAtual, lucroSug, st: status(lucroAtual, marg, ct != null, p.atual > 0) };
+}
+function calcServ(s, b) {
+  const P = S.params;
+  const marg = (ok(s.marg) ? s.marg : P.margServ) / 100;
+  const insumos = (s.insumos || []).reduce((a, i) => a + (ok(i.q) ? i.q : 1) * (ok(i.v) ? i.v : 0), 0);
+  const terceiros = ok(s.terceiros) ? s.terceiros : 0;
+  const estrutura = (s.min || 0) * b.custoMin;
+  const ct = insumos + terceiros + estrutura;
+  const div = 1 - (b.varServ + marg), divMin = 1 - b.varServ;
+  const sug = arred(div > 0 ? ct / div : null, P.arrServ);
+  const min = divMin > 0 ? ct / divMin : null;
+  const lucroAtual = s.atual > 0 ? 1 - ct / s.atual - b.varServ : null;
+  const lucroSug = sug > 0 ? 1 - ct / sug - b.varServ : null;
+  return { marg, insumos, terceiros, estrutura, ct, div, sug, min, lucroAtual, lucroSug, st: status(lucroAtual, marg, ct > 0, s.atual > 0) };
+}
+function saude(m) {
+  if (!ok(m)) return ['', ''];
+  if (m < 5) return ['st-baixa', 'Muito baixa'];
+  if (m < 10) return ['st-abaixo', 'Baixa'];
+  if (m <= 25) return ['st-ok', 'Saudável'];
+  if (m <= 35) return ['st-alta', 'Alta: compare com a concorrência'];
+  return ['st-baixa', 'Muito alta: risco de perder clientes'];
+}
+function compBar(parts) {
+  const tot = parts.reduce((a, p) => a + Math.max(0, p[1]), 0) || 1;
+  return `<div class="bar">${parts.map(p => `<span style="width:${Math.max(0, p[1]) / tot * 100}%;background:var(${p[2]})" title="${esc(p[0])}"></span>`).join('')}</div>
+  <div class="legend">${parts.map(p => `<span><i style="background:var(${p[2]})"></i>${esc(p[0])} <b class="num">${pct(p[1])}</b></span>`).join('')}</div>`;
+}
+
+/* ---------- navegação ---------- */
+let TAB = 'produtos';
+const UI = { pBusca: '', pFiltro: 'todos', pOrdem: 'nome', sBusca: '', sFiltro: 'todos', sOrdem: 'nome' };
+function show(tab) {
+  TAB = tab;
+  $$('nav.tabs button').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === tab));
+  ({ produtos: renderProdutos, servicos: renderServicos, notas: renderNotas, custos: renderCustos })[tab]();
+  try { localStorage.setItem(KEY + '-tab', tab); } catch (e) { }
+}
+$$('nav.tabs button').forEach(b => b.addEventListener('click', () => show(b.dataset.tab)));
+function refreshDatalists() {
+  $('#dlProdutos').innerHTML = S.produtos.map(p => `<option value="${esc(p.nome)}">`).join('');
+  const f = new Set([...S.nfs.map(n => n.forn), ...S.custos.filter(c => c.tipo === 'mercadoria').map(c => c.nome)].filter(Boolean));
+  $('#dlForn').innerHTML = [...f].map(x => `<option value="${esc(x)}">`).join('');
+}
+
+/* campos editáveis ligados a S.params */
+function pField(key, label, unit, hint, opts = {}) {
+  const v = S.params[key];
+  const inp = `<input type="text" inputmode="decimal" class="n" data-p="${key}" value="${inv(v)}" aria-label="${esc(label)}">`;
+  const box = unit === 'R$' ? `<div class="affix"><span>R$</span>${inp}</div>` : unit ? `<div class="affix">${inp}<span>${unit}</span></div>` : inp;
+  return `<div class="field${opts.wide ? ' wide' : ''}"><label>${label}</label>${box}${hint || opts.hintId ? `<span class="hint" ${opts.hintId ? `id="${opts.hintId}"` : ''}>${hint}</span>` : ''}</div>`;
+}
+function arrSelect(key) {
+  const o = [['0', 'Sem arredondar'], ['90', 'Final ,90 (ex.: R$ 49,90)'], ['int', 'Real inteiro'], ['5', 'Múltiplo de R$ 5'], ['10', 'Múltiplo de R$ 10']];
+  return `<div class="field"><label>Arredondar preço sugerido</label><select data-p="${key}">${o.map(([v, t]) => `<option value="${v}"${S.params[key] === v ? ' selected' : ''}>${t}</option>`).join('')}</select></div>`;
+}
+document.addEventListener('input', e => {
+  const k = e.target.dataset && e.target.dataset.p;
+  if (!k) return;
+  S.params[k] = e.target.tagName === 'SELECT' ? e.target.value : numOrNull(e.target.value);
+  save(); updateTab();
+});
+document.addEventListener('change', e => {
+  const k = e.target.dataset && e.target.dataset.p;
+  if (k && e.target.tagName === 'SELECT') { S.params[k] = e.target.value; save(); updateTab(); }
+});
+function updateTab() { ({ produtos: updProdutos, servicos: updServicos, notas: () => { }, custos: updCustos })[TAB](); }
+
+/* confirmação em dois toques (sem diálogos nativos, que não abrem no app Android) */
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-confirm]');
+  if (!b) return;
+  if (!b.classList.contains('armed')) {
+    e.stopImmediatePropagation(); e.preventDefault();
+    b.dataset.label = b.textContent; b.textContent = b.dataset.confirm; b.classList.add('armed');
+    setTimeout(() => { if (b.isConnected) { b.classList.remove('armed'); b.textContent = b.dataset.label; } }, 3500);
+  }
+}, true);
+
+/* ---------- PRODUTOS ---------- */
+function renderProdutos() {
+  const P = S.params;
+  $('#main').innerHTML = `
+  <div class="grid2">
+    <div class="card">
+      <div class="card-head"><h2>Margem de lucro dos produtos</h2><span class="pill" id="pSaude"></span></div>
+      <div class="fields">
+        ${pField('margProd', 'Lucro desejado sobre o preço', '%', 'Faixa saudável: 10% a 25%')}
+        ${arrSelect('arrProd')}
+      </div>
+      <div id="pResumo"></div>
     </div>
-    <div class="stats">
-      <div class="stat"><div class="lbl">Custo direto</div><div class="val">${brl(R.custo)}</div><div class="sub">${esc(R.custoSub||'')}</div></div>
-      <div class="stat"><div class="lbl">Ponto de equilíbrio</div><div class="val">${brl(E.be('pix'))}</div><div class="sub">à vista · ${brl(E.be(payK))} no ${n>1?n+'x':payLabel(payK).toLowerCase()}</div></div>
-      <div class="stat"><div class="lbl">Lucro líquido real</div><div class="val">${brl(lucro)}</div><div class="sub">${R.atual>0?'preço atual':'preço sugerido'} · ${n>1?n+'x':payLabel(payK).toLowerCase()} · à vista ${brl(lucroPix)}</div></div>
-      <div class="stat"><div class="lbl">Margem real</div><div class="val" style="color:var(--${st==='ok'?'ok':st==='warn'?'warn':'bad'})">${pct(m)}</div><div class="sub">meta ${pct(R.meta)} · à vista ${pct(mPix)}</div></div>
+    <div class="card how">
+      <h3>Como o preço é calculado</h3>
+      <p>Fórmula do Sebrae para comércio, completada com o que sai de cada venda:</p>
+      <div class="formula">Preço = Custo total ÷ (1 − (custos fixos % + impostos % + cartão % + lucro %))</div>
+      <p><b>Custo total</b> = preço de compra da nota fiscal + frete e despesas da nota rateados + perdas/vencimento (${fmt(P.perdas, 1)}%).</p>
+      <p>Os percentuais de impostos, cartão e custos fixos ficam na aba <b>Custos da clínica</b>. O custo de compra vem da aba <b>Notas de entrada</b>.</p>
     </div>
-    ${alertHTML}
-    <h3 style="margin-top:16px">Composição do preço à vista</h3>
-    <div class="bar" role="img" aria-label="Composição do preço">${parts.map(p=>`<i style="width:${(p.v/tot*100).toFixed(2)}%;background:var(${p.c})" title="${esc(p.l)}"></i>`).join('')}</div>
-    <div class="legend">${parts.map(p=>`<div><i style="background:var(${p.c})"></i><span>${esc(p.l)}</span><span>${brl(p.v)}</span></div>`).join('')}</div>
-    <details open style="margin-top:14px"><summary>Preço por forma de pagamento</summary>
-      <div class="tbl-wrap"><table><thead><tr><th>Forma</th><th class="num">Taxa</th><th class="num">Sugerido</th><th class="num">Parcela</th><th class="num">Mínimo</th>${R.atual>0?'<th class="num">Margem</th>':''}</tr></thead><tbody>${rows}</tbody></table></div>
-      <p class="muted" style="font-size:.78rem;margin:6px 0 0">“Sugerido” repassa a taxa de cada modalidade mantendo a margem. “Margem atual” mostra quanto sobra se você cobrar o mesmo preço atual em todas as formas.</p>
-    </details>`;
-}
-
-/* ---------------- Procedimentos ---------------- */
-function procCost(p,faixaIdx){
-  const d=derived(),cir=p.sala==='cc',b=S.cfg.faixas[faixaIdx]||S.cfg.faixas[0]||{fp:1,ft:1};
-  const fp=cir?num(b.fp)||1:1, ft=cir&&p.escT?num(b.ft)||1:1, min=num(p.min)*ft, hr=cir?d.hrCC:d.hrClin;
-  const tempo=min/60*hr;
-  const line=r=>num(r.q)*num(r.c)*(r.e?fp:1)*(r.t?min/60:1);
-  const ins=p.rows.reduce((a,r)=>a+line(r),0);
-  const an=cir&&p.prot!=='nenhum'?(S.cfg.anest[p.prot]||[]).reduce((a,r)=>a+line(r),0):0;
-  return {tempo,ins,an,custo:tempo+ins+an,min,fp,hr,cir};
-}
-function procBase(p,faixaIdx,payK){
-  const c=procCost(p,faixaIdx),cfg=S.cfg;
-  const meta=num(cfg.metaServ)/100, margem=p.margem==null?meta:num(p.margem)/100;
-  return {c,custo:c.custo,imp:num(cfg.impServ)/100,com:num(cfg.comServ)/100,fix:0,margem,meta,atual:num(p.atual),payK};
-}
-let procEd;
-function curProc(){if(!S.procs.length)S.procs.push(P(CATS[0],'Novo procedimento','clin',30,[]));S.ui.proc=Math.min(S.ui.proc,S.procs.length-1);return S.procs[S.ui.proc];}
-function renderProcSel(){
-  $('#procSel').innerHTML=CATS.map(cat=>`<optgroup label="${esc(cat)}">${S.procs.map((p,i)=>p.cat===cat?`<option value="${i}">${esc(p.nome)}</option>`:'').join('')}</optgroup>`).join('');
-  $('#procSel').value=S.ui.proc;
-}
-function renderProcForm(){
-  const p=curProc();
-  renderProcSel();
-  $('#procCat').innerHTML=CATS.map(c=>`<option>${esc(c)}</option>`).join('');$('#procCat').value=p.cat;
-  $('#procNome').value=p.nome;$('#procSala').value=p.sala;$('#procMin').value=p.min;
-  $('#procFaixa').innerHTML=S.cfg.faixas.map((f,i)=>`<option value="${i}">${esc(f.n)}</option>`).join('');$('#procFaixa').value=Math.min(S.ui.faixa,S.cfg.faixas.length-1);
-  $('#procProt').value=p.prot;$('#procEscT').value=p.escT?'1':'0';
-  $('#cirFields').hidden=p.sala!=='cc';
-  $('#procMargem').value=p.margem==null?S.cfg.metaServ:p.margem;$('#procAtual').value=p.atual||0;
-  fillPay($('#procPay'),S.ui.payProc,true);
-  procEd=editor($('#procRows'),{rows:()=>curProc().rows,addLabel:'+ Adicionar insumo',newRow:()=>L('Novo insumo',1,0),onChange:calcProc,
-    cols:[{k:'n',label:'Insumo',type:'text'},{k:'q',label:'Qtd',type:'num',step:'0.1'},{k:'c',label:'Custo unit. (R$)',type:'num'},{k:'e',label:'× peso',type:'check'},
-      {label:'Subtotal',calc:r=>{const c=procCost(curProc(),S.ui.faixa);return brl(num(r.q)*num(r.c)*(r.e?c.fp:1));}}]});
-  calcProc();
-}
-function calcProc(){
-  const p=curProc(),B=procBase(p,S.ui.faixa,S.ui.payProc),c=B.c;
-  $('#procMeta').textContent=pct(B.meta);
-  if(procEd)procEd.refresh();
-  // Anestesia (somente leitura)
-  const an=$('#procAnest');
-  if(c.cir&&p.prot!=='nenhum'){
-    const rows=S.cfg.anest[p.prot]||[];
-    an.innerHTML=`<div class="tbl-wrap"><table><thead><tr><th>Protocolo ${p.prot==='inj'?'injetável':'inalatório'} · ${esc(S.cfg.faixas[S.ui.faixa]?.n||'')}</th><th class="num">Qtd</th><th class="num">Fator</th><th class="num">Subtotal</th></tr></thead><tbody>${rows.map(r=>{const f=(r.e?c.fp:1)*(r.t?c.min/60:1);return `<tr class="ro"><td>${esc(r.n)}</td><td class="num">${num(r.q)}</td><td class="num">${f.toLocaleString('pt-BR',{maximumFractionDigits:2})}×</td><td class="num">${brl(num(r.q)*num(r.c)*f)}</td></tr>`}).join('')}</tbody><tfoot><tr><td colspan="3"><b>Total anestesia</b> <small class="muted">· edite doses e custos em Parâmetros de custo</small></td><td class="num"><b>${brl(c.an)}</b></td></tr></tfoot></table></div>`;
-  } else an.innerHTML='';
-  const parts=[{l:(c.cir?'Hora-centro cirúrgico':'Hora-clínica')+` (${Math.round(c.min)} min)`,v:c.tempo,c:'--c1'},{l:'Insumos e materiais',v:c.ins,c:'--c2'}];
-  if(c.an>0)parts.push({l:'Protocolo anestésico',v:c.an,c:'--c2'});
-  renderResult($('#procResult'),{...B,parts,title:p.nome,subtitle:c.cir?(S.cfg.faixas[S.ui.faixa]?.n||''):'',
-    custoSub:`tempo ${brl(c.tempo)} + insumos ${brl(c.ins+c.an)}`});
-}
-function bindProc(){
-  $('#procSel').onchange=e=>{S.ui.proc=+e.target.value;save();renderProcForm();};
-  const set=(id,fn,re)=>{$(id).oninput=e=>{fn(curProc(),e.target.value);save();re?renderProcForm():calcProc();};};
-  set('#procNome',(p,v)=>{p.nome=v;const o=$('#procSel').selectedOptions[0];if(o)o.textContent=v;});
-  set('#procCat',(p,v)=>{p.cat=v;},true);
-  set('#procSala',(p,v)=>{p.sala=v;},true);
-  set('#procMin',(p,v)=>{p.min=num(v);});
-  $('#procFaixa').oninput=e=>{S.ui.faixa=+e.target.value;save();calcProc();};
-  set('#procProt',(p,v)=>{p.prot=v;});
-  set('#procEscT',(p,v)=>{p.escT=v==='1';});
-  set('#procMargem',(p,v)=>{p.margem=v===''?null:num(v);});
-  set('#procAtual',(p,v)=>{p.atual=num(v);});
-  $('#procPay').oninput=e=>{S.ui.payProc=e.target.value;save();calcProc();};
-  $('#procNew').onclick=()=>{S.procs.push(P(curProc().cat,'Novo procedimento',curProc().sala,30,[L('Luvas de procedimento — par',1,0.60)],{atual:0}));S.ui.proc=S.procs.length-1;save();renderProcForm();$('#procNome').focus();$('#procNome').select();};
-  $('#procReset').onclick=()=>{const p=curProc(),d=defaultProcs().find(x=>x.nome===p.nome);if(!d){flash($('#procReset'),'Sem padrão para este nome');return;}d.id=p.id;S.procs[S.ui.proc]=d;save();renderProcForm();flash($('#procReset'),'Restaurado');};
-  let delArm=0;$('#procDel').onclick=e=>{if(!delArm){delArm=1;e.target.textContent='Confirmar exclusão';setTimeout(()=>{delArm=0;e.target.textContent='Excluir';},3000);return;}delArm=0;e.target.textContent='Excluir';S.procs.splice(S.ui.proc,1);S.ui.proc=0;save();renderProcForm();};
-}
-function flash(btn,txt){const o=btn.textContent;btn.textContent=txt;setTimeout(()=>btn.textContent=o,1600);}
-
-/* ---------------- Farmácia ---------------- */
-function segOf(id){return S.cfg.segs.find(s=>s.id===id)||S.cfg.segs[0]||{id:'',n:'—',meta:20,perda:0}}
-function prodBase(r,payK){
-  const sg=segOf(r.seg),perda=r.perda==null?num(sg.perda):num(r.perda);
-  const cmv=num(r.custo)*(1+num(r.frete)/100)*(1+perda/100);
-  const meta=num(sg.meta)/100, margem=r.margem==null?meta:num(r.margem)/100;
-  return {cmv,perda,custo:cmv,imp:num(S.cfg.impProd)/100,com:num(S.cfg.comProd)/100,fix:derived().fixFarm,margem,meta,atual:num(r.atual),payK};
-}
-let prListEd;
-function curProd(){if(!S.prods.length)S.prods.push(PR(S.cfg.segs[0]?.id||'','Novo produto',0,0));S.ui.prod=Math.min(S.ui.prod,S.prods.length-1);return S.prods[S.ui.prod];}
-function renderProdForm(){
-  const r=curProd(),sg=segOf(r.seg);
-  $('#prSeg').innerHTML=S.cfg.segs.map(s=>`<option value="${s.id}">${esc(s.n)}</option>`).join('');
-  $('#prNome').value=r.n;$('#prSeg').value=sg.id;$('#prCusto').value=r.custo;$('#prFrete').value=r.frete;
-  $('#prPerda').value=r.perda==null?sg.perda:r.perda;$('#prMargem').value=r.margem==null?sg.meta:r.margem;$('#prAtual').value=r.atual||0;
-  fillPay($('#prPay'),S.ui.payProd,true);
-  calcProd();
-}
-function calcProd(){
-  const r=curProd(),B=prodBase(r,S.ui.payProd),E=engine(B);
-  $('#prMeta').textContent=pct(B.meta);
-  const mk=num(r.custo)>0?E.price('pix')/num(r.custo):NaN;
-  renderResult($('#prResult'),{...B,title:r.n,subtitle:segOf(r.seg).n,
-    parts:[{l:'Custo de aquisição (NF)',v:num(r.custo),c:'--c1'},{l:'Frete, ST e perdas',v:B.cmv-num(r.custo),c:'--c2'}],
-    custoSub:`CMV · markup à vista ${isFinite(mk)?mk.toLocaleString('pt-BR',{maximumFractionDigits:2})+'×':'—'} sobre a NF`});
-  if(prListEd)prListEd.refresh();
-}
-function renderProdList(){
-  fillPay($('#prListPay'),S.ui.listPay);
-  prListEd=editor($('#prList'),{rows:()=>S.prods,clickable:true,addLabel:'+ Adicionar produto',
-    newRow:()=>PR(curProd().seg,'Novo produto',0,0),
-    onChange:()=>{renderProdForm();},
-    onRowClick:i=>{S.ui.prod=i;save();renderProdForm();document.getElementById('prNome').scrollIntoView({behavior:'smooth',block:'center'});},
-    cols:[{k:'n',label:'Produto',type:'text'},{k:'seg',label:'Segmento',type:'select',options:()=>S.cfg.segs.map(s=>({v:s.id,l:s.n}))},
-      {k:'custo',label:'Custo NF',type:'num'},
-      {label:'Sugerido',calc:r=>brl(engine(prodBase(r)).price(S.ui.listPay))},
-      {label:'Markup',calc:r=>{const v=engine(prodBase(r)).price(S.ui.listPay)/num(r.custo);return isFinite(v)?v.toLocaleString('pt-BR',{maximumFractionDigits:2})+'×':'—'}},
-      {k:'atual',label:'Preço atual',type:'num'},
-      {label:'Margem real',calc:r=>{const B=prodBase(r);if(!(B.atual>0))return '—';const m=engine(B).lucro(B.atual,S.ui.listPay)/B.atual;return pct(m)},
-        cls:r=>{const B=prodBase(r);if(!(B.atual>0))return '';return 'st-'+statusOf(engine(B).lucro(B.atual,S.ui.listPay)/B.atual,B.meta)}},
-      {label:'Status',calc:r=>{const B=prodBase(r);if(!(B.atual>0))return '<span class="pill na">sem preço</span>';const s=statusOf(engine(B).lucro(B.atual,S.ui.listPay)/B.atual,B.meta);return `<span class="pill ${s}">${ST_TXT[s]}</span>`}}]});
-}
-function bindProd(){
-  const set=(id,fn,full)=>{$(id).oninput=e=>{fn(curProd(),e.target.value);save();if(full)renderProdForm();else calcProd();if(prListEd&&full)prListEd.render();};};
-  set('#prNome',(r,v)=>{r.n=v;const inp=document.getElementById('prList-'+S.ui.prod+'-n');if(inp)inp.value=v;});
-  set('#prSeg',(r,v)=>{r.seg=v;r.perda=null;r.margem=null;},true);
-  set('#prCusto',(r,v)=>{r.custo=num(v);const inp=document.getElementById('prList-'+S.ui.prod+'-custo');if(inp)inp.value=v;});
-  set('#prFrete',(r,v)=>{r.frete=num(v);});
-  set('#prPerda',(r,v)=>{r.perda=v===''?null:num(v);});
-  set('#prMargem',(r,v)=>{r.margem=v===''?null:num(v);});
-  set('#prAtual',(r,v)=>{r.atual=num(v);const inp=document.getElementById('prList-'+S.ui.prod+'-atual');if(inp)inp.value=v;});
-  $('#prPay').oninput=e=>{S.ui.payProd=e.target.value;save();calcProd();};
-  $('#prListPay').oninput=e=>{S.ui.listPay=e.target.value;save();prListEd.refresh();};
-}
-
-/* ---------------- Tabela de serviços ---------------- */
-function renderTabela(){
-  $('#tbFaixa').innerHTML=S.cfg.faixas.map((f,i)=>`<option value="${i}">${esc(f.n)}</option>`).join('');$('#tbFaixa').value=Math.min(S.ui.tbFaixa,S.cfg.faixas.length-1);
-  fillPay($('#tbPay'),S.ui.tbPay);
-  let h=`<div class="tbl-wrap"><table><thead><tr><th>Procedimento</th><th class="num">Tempo</th><th class="num">Custo direto</th><th class="num">Mínimo à vista</th><th class="num">Sugerido à vista</th><th class="num">Sugerido crédito 1x</th><th class="num">Preço atual</th><th class="num">Margem real</th><th>Status</th></tr></thead><tbody>`;
-  CATS.forEach(cat=>{
-    const list=S.procs.map((p,i)=>[p,i]).filter(([p])=>p.cat===cat);if(!list.length)return;
-    h+=`<tr class="group"><td colspan="9">${esc(cat)}</td></tr>`;
-    list.forEach(([p,i])=>{const B=procBase(p,S.ui.tbFaixa,S.ui.tbPay),E=engine(B);
-      const m=B.atual>0?E.lucro(B.atual,S.ui.tbPay)/B.atual:NaN,s=B.atual>0?statusOf(m,B.meta):'na';
-      h+=`<tr class="clickable" data-open="${i}"><td>${esc(p.nome)}</td><td class="num">${Math.round(B.c.min)} min</td><td class="num">${brl(B.custo)}</td><td class="num">${brl(E.be('pix'))}</td><td class="num"><b>${brl(E.price('pix'))}</b></td><td class="num">${brl(E.price('c1'))}</td><td class="num">${B.atual>0?brl(B.atual):'—'}</td><td class="num st-${s}">${B.atual>0?pct(m):'—'}</td><td><span class="pill ${s}">${B.atual>0?ST_TXT[s]:'sem preço'}</span></td></tr>`;});
+  </div>
+  <div class="card">
+    <div class="toolbar">
+      <input type="text" id="pBusca" placeholder="Buscar produto…" value="${esc(UI.pBusca)}" aria-label="Buscar produto">
+      <div class="chips" id="pChips"></div>
+      <span class="spacer"></span>
+      <select id="pOrdem" aria-label="Ordenar">
+        <option value="nome">Ordem: nome</option><option value="sit">Ordem: situação</option><option value="vendas">Ordem: mais vendidos</option>
+      </select>
+      <button class="btn sm" id="pNovo">+ Produto</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Produto</th><th class="r">Custo unitário</th><th class="r">Preço mínimo</th><th class="r">Preço sugerido</th><th class="r">Preço atual</th><th class="r">Lucro no preço atual</th><th>Situação</th></tr></thead>
+      <tbody id="pBody"></tbody>
+    </table></div>
+  </div>`;
+  $('#pOrdem').value = UI.pOrdem;
+  $('#pBusca').addEventListener('input', e => { UI.pBusca = e.target.value; updProdutos(); });
+  $('#pOrdem').addEventListener('change', e => { UI.pOrdem = e.target.value; updProdutos(); });
+  $('#pNovo').addEventListener('click', () => {
+    const p = { id: uid(), nome: 'Novo produto', qtd: 0, atual: null };
+    S.produtos.push(p); save(); updProdutos(); openProd(p.id);
   });
-  $('#tbHost').innerHTML=h+'</tbody></table></div>';
+  $('#pBody').addEventListener('click', e => { const tr = e.target.closest('tr[data-id]'); if (tr) openProd(tr.dataset.id); });
+  $('#pChips').addEventListener('click', e => { const c = e.target.closest('[data-f]'); if (c) { UI.pFiltro = c.dataset.f; updProdutos(); } });
+  updProdutos();
 }
-function bindTabela(){
-  $('#tbFaixa').oninput=e=>{S.ui.tbFaixa=+e.target.value;save();renderTabela();};
-  $('#tbPay').oninput=e=>{S.ui.tbPay=e.target.value;save();renderTabela();};
-  $('#tbHost').onclick=e=>{const tr=e.target.closest('[data-open]');if(!tr)return;S.ui.proc=+tr.dataset.open;S.ui.faixa=S.ui.tbFaixa;save();renderProcForm();showTab('procedimentos');};
-}
-
-/* ---------------- Parâmetros ---------------- */
-let edF;
-function renderParams(){
-  const c=S.cfg;
-  document.querySelectorAll('[data-cfg]').forEach(i=>{i.value=c[i.dataset.cfg];});
-  edF=editor($('#edFixos'),{rows:()=>S.cfg.fixos,addLabel:'+ Adicionar custo fixo',newRow:()=>({g:'Outros',n:'Novo custo',v:0}),onChange:refreshDerived,
-    cols:[{k:'g',label:'Grupo',type:'text'},{k:'n',label:'Descrição',type:'text'},{k:'v',label:'R$/mês',type:'num'}]});
-  const fg=$('#cardFees');
-  fg.innerHTML=[{k:'pix',l:'Pix'},{k:'deb',l:'Débito'}].concat(c.taxas.cred.map((_,i)=>({k:'c'+i,l:(i+1)+'x'}))).map(o=>{
-    const v=o.k==='pix'?c.taxas.pix:o.k==='deb'?c.taxas.deb:c.taxas.cred[+o.k.slice(1)];
-    return `<div class="field"><label for="fee-${o.k}">${o.l}</label><input type="number" id="fee-${o.k}" data-fee="${o.k}" step="0.01" value="${v}"></div>`}).join('');
-  fg.oninput=e=>{const k=e.target.dataset.fee;if(!k)return;const v=num(e.target.value);if(k==='pix')c.taxas.pix=v;else if(k==='deb')c.taxas.deb=v;else c.taxas.cred[+k.slice(1)]=v;save();refreshDerived();};
-  editor($('#edSegs'),{rows:()=>S.cfg.segs,addLabel:'+ Adicionar segmento',newRow:()=>({id:'s'+Date.now().toString(36),n:'Novo segmento',meta:25,perda:1}),onChange:()=>{refreshDerived();},
-    cols:[{k:'n',label:'Segmento',type:'text'},{k:'meta',label:'Meta %',type:'num',step:'0.5'},{k:'perda',label:'Perdas %',type:'num',step:'0.5'}]});
-  editor($('#edFaixas'),{rows:()=>S.cfg.faixas,addLabel:'+ Adicionar faixa',newRow:()=>({n:'Nova faixa',fp:1,ft:1}),onChange:refreshDerived,
-    cols:[{k:'n',label:'Faixa',type:'text'},{k:'fp',label:'Fator insumos',type:'num',step:'0.1'},{k:'ft',label:'Fator tempo',type:'num',step:'0.05'}]});
-  const anCols=[{k:'n',label:'Fármaco / item',type:'text'},{k:'q',label:'Qtd',type:'num',step:'0.1'},{k:'c',label:'Custo (R$)',type:'num'},{k:'e',label:'× peso',type:'check'},{k:'t',label:'Por hora',type:'check'}];
-  editor($('#edInj'),{rows:()=>S.cfg.anest.inj,addLabel:'+ Adicionar item',newRow:()=>L('Novo fármaco',1,0,true),onChange:refreshDerived,cols:anCols});
-  editor($('#edInal'),{rows:()=>S.cfg.anest.inal,addLabel:'+ Adicionar item',newRow:()=>L('Novo fármaco',1,0,true),onChange:refreshDerived,cols:anCols});
-  refreshDerived();
-}
-function refreshDerived(){
-  const d=derived(),c=S.cfg;
-  $('#fixTotal').textContent=brl(d.F)+'/mês';
-  $('#hdrClin').textContent=brl(d.hrClin);$('#hdrCC').textContent=brl(d.hrCC);
-  const warnShare=d.rClin<0?' <span class="err">(rateio passa de 100%)</span>':'';
-  $('#kvDerived').innerHTML=[
-    ['Custos fixos + depreciação CC',brl(d.total)],['Custo hora-clínica',brl(d.hrClin)],['Custo hora-centro cirúrgico',brl(d.hrCC)],
-    ['Custo fixo embutido na farmácia',pct(d.fixFarm)],['Parcela dos fixos no consultório',pct(d.rClin,0)+warnShare],
-    ['Faturamento mínimo da clínica*',brl(d.total/Math.max(1-num(c.impServ)/100-fee('c1')-num(c.comServ)/100-0.25,1e-9))]
-  ].map(([l,v])=>`<div><div class="lbl">${l}</div><div class="val">${v}</div></div>`).join('');
-  $('#fxDerived').innerHTML=`Hora-clínica = fixos × ${pct(d.rClin,0)} ÷ ${num(c.hClin)} h · Hora-CC = (fixos × ${pct(num(c.rCC)/100,0)} + depreciação CC) ÷ ${num(c.hCC)} h · Preço = custo direto ÷ (1 − imposto − taxa − comissão − margem) · *mínimo supondo 25% de insumos sobre a receita e crédito 1x`;
-  if(document.getElementById('procResult'))calcProc();
-  if(document.getElementById('prResult')&&S.prods.length)calcProd();
-}
-function bindParams(){
-  document.querySelectorAll('[data-cfg]').forEach(i=>{i.oninput=()=>{S.cfg[i.dataset.cfg]=num(i.value);save();refreshDerived();};});
-  const msg=t=>{$('#bkMsg').textContent=t;};
-  $('#bkGen').onclick=()=>{const ta=$('#bkText');ta.value=JSON.stringify({app:'vetclin-precificacao',v:1,data:S});ta.focus();ta.select();
-    const done=()=>msg('Backup copiado. Cole num lugar seguro.'),fail=()=>{try{document.execCommand('copy')?done():msg('Texto selecionado. Copie e guarde num lugar seguro.');}catch(e){msg('Texto selecionado. Copie e guarde num lugar seguro.');}};
-    try{navigator.clipboard.writeText(ta.value).then(done,fail);}catch(e){fail();}};
-  $('#bkLoad').onclick=()=>{try{const o=JSON.parse($('#bkText').value.trim());const d=o&&o.data;if(!d||!d.cfg||!d.procs||!d.prods)throw 0;
-    S=d;S.ui.tab='parametros';save();renderAll();msg('Backup restaurado.');}catch(e){msg('Não reconheci o texto. Cole o backup completo, do primeiro { ao último }.');}};
-  let arm=0;$('#resetAll').onclick=e=>{if(!arm){arm=1;e.target.textContent='Clique de novo para apagar seus valores';setTimeout(()=>{arm=0;e.target.textContent='Restaurar todos os valores de exemplo';},3500);return;}
-    arm=0;const tab=S.ui.tab;S=fresh();S.ui.tab=tab;save();renderAll();e.target.textContent='Restaurar todos os valores de exemplo';};
+const ORD_ST = { prejuizo: 0, abaixo: 1, semcusto: 2, semprec: 3, ok: 4 };
+function updProdutos() {
+  if (TAB !== 'produtos') return;
+  const P = S.params, b = base(), map = custosNF();
+  const [cls, lab] = saude(P.margProd);
+  const sp = $('#pSaude'); sp.className = 'pill ' + cls; sp.textContent = lab;
+  const marg = (P.margProd || 0) / 100;
+  const div = 1 - (b.varProd + b.dfProd + marg);
+  $('#pResumo').innerHTML = div > 0 ? `
+    <div class="kpis">
+      <div class="kpi"><div class="l">Markup (multiplicador sobre o custo)</div><div class="v">${fmt(1 / div, 2)} ×</div></div>
+      <div class="kpi"><div class="l">Exemplo: custo de R$ 10,00</div><div class="v">${money(arred(10 / div, P.arrProd))}</div></div>
+    </div>
+    <p class="small muted" style="margin-top:12px">De cada R$ 100 vendidos em produtos:</p>
+    ${compBar([['Custo do produto', div, '--s-custo'], ['Custos fixos', b.dfProd, '--s-fixo'], ['Impostos', (P.impProd || 0) / 100, '--s-imp'], ['Cartão e comissão', ((P.cartao || 0) + (P.comissao || 0)) / 100, '--s-taxa'], ['Lucro', marg, '--s-lucro']])}`
+    : `<div class="alert bad">Custos fixos (${pct(b.dfProd)}) + impostos + cartão + lucro passam de 100% do preço. Reduza a margem ou a parcela de custos fixos dos produtos na aba Custos da clínica.</div>`;
+  let rows = S.produtos.map(p => ({ p, r: calcProd(p, b, map) }));
+  const cont = { todos: rows.length, prejuizo: 0, abaixo: 0, semcusto: 0, ok: 0 };
+  rows.forEach(x => { if (x.r.st in cont) cont[x.r.st]++; });
+  $('#pChips').innerHTML = [['todos', 'Todos'], ['prejuizo', 'Prejuízo'], ['abaixo', 'Abaixo da meta'], ['semcusto', 'Sem custo'], ['ok', 'Saudáveis']]
+    .map(([k, t]) => `<button class="chip" data-f="${k}" aria-pressed="${UI.pFiltro === k}">${t} <span class="num">${cont[k]}</span></button>`).join('');
+  const q = norm(UI.pBusca);
+  if (q) rows = rows.filter(x => norm(x.p.nome).includes(q));
+  if (UI.pFiltro !== 'todos') rows = rows.filter(x => x.r.st === UI.pFiltro);
+  const byName = (a, c) => a.p.nome.localeCompare(c.p.nome, 'pt-BR');
+  rows.sort(UI.pOrdem === 'sit' ? (a, c) => ORD_ST[a.r.st] - ORD_ST[c.r.st] || byName(a, c) : UI.pOrdem === 'vendas' ? (a, c) => (c.p.qtd || 0) - (a.p.qtd || 0) || byName(a, c) : byName);
+  $('#pBody').innerHTML = rows.length ? rows.map(({ p, r }) => `
+    <tr class="click" data-id="${p.id}">
+      <td class="name">${esc(p.nome)}<small>${p.qtd ? `${p.qtd} vendidos/mês` : ''}</small></td>
+      <td class="r num">${r.c ? money(r.c.v) : '—'}<small>${r.c ? (r.c.fonte === 'nf' ? 'NF ' + esc(r.c.nf.num || '') : 'manual') : 'lance a NF'}</small></td>
+      <td class="r num">${money(r.min)}</td>
+      <td class="r num"><span class="sug">${money(r.sug)}</span></td>
+      <td class="r num">${money(p.atual)}</td>
+      <td class="r num">${pct(r.lucroAtual)}</td>
+      <td><span class="pill st-${r.st}">${ST_LABEL[r.st]}</span></td>
+    </tr>`).join('') : `<tr><td colspan="7" class="empty">Nenhum produto neste filtro.</td></tr>`;
 }
 
-/* ---------------- Abas ---------------- */
-const TABS=['procedimentos','farmacia','tabela','parametros'];
-function showTab(t){if(!TABS.includes(t))t='procedimentos';S.ui.tab=t;save();
-  document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===t?'true':'false'));
-  TABS.forEach(x=>{document.getElementById('tab-'+x).hidden=x!==t;});
-  if(t==='tabela')renderTabela();
-  if(t==='farmacia'){prListEd&&prListEd.render();calcProd();}
-  if(t==='procedimentos')renderProcForm();
+/* ---------- modal genérico ---------- */
+let modalClose = null;
+function openModal(html, onClose) {
+  const old = $('#sheet'), sheet = old.cloneNode(false);
+  old.replaceWith(sheet);
+  sheet.innerHTML = html;
+  $('#modal').hidden = false;
+  modalClose = onClose || null;
+  const f = $('#sheet input,#sheet select'); if (f && window.innerWidth > 700) f.focus();
 }
-document.querySelector('nav.tabs').onclick=e=>{const b=e.target.closest('[data-tab]');if(b)showTab(b.dataset.tab);};
+function closeModal() {
+  $('#modal').hidden = true; $('#sheet').innerHTML = '';
+  const cb = modalClose; modalClose = null; if (cb) cb();
+}
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal' || e.target.closest('[data-close]')) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#modal').hidden) closeModal(); });
 
-function renderAll(){renderParams();renderProcForm();renderProdList();renderProdForm();renderTabela();showTab(S.ui.tab);}
-bindProc();bindProd();bindTabela();bindParams();
-renderAll();
-const h=(location.hash||'').slice(1);if(TABS.includes(h))showTab(h);
+function openProd(id) {
+  const p = S.produtos.find(x => x.id === id);
+  if (!p) return;
+  const P = S.params;
+  const map = custosNF();
+  const hist = (map[p.id] || []).slice().reverse();
+  openModal(`
+    <header><h2>Produto</h2><button class="icon-btn" data-close aria-label="Fechar">✕</button></header>
+    <div class="fields">
+      <div class="field wide"><label>Nome</label><input type="text" data-f="nome" value="${esc(p.nome)}"></div>
+      <div class="field"><label>Custo de compra por unidade</label><div class="affix"><span>R$</span><input type="text" inputmode="decimal" class="n" data-f="custo" value="${inv(p.custo)}" placeholder="${hist.length ? fmt(hist[0].un) : ''}"></div>
+        <span class="hint">${hist.length ? `Vem da NF ${esc(hist[0].nf.num)} de ${dataBR(hist[0].nf.data)}.` : 'Sem nota lançada: digite o custo ou lance a NF.'}</span></div>
+      ${hist.length ? `<div class="field"><label>&nbsp;</label><label class="check"><input type="checkbox" data-f="manual" ${p.manual ? 'checked' : ''}> Usar o custo digitado em vez da NF</label></div>` : ''}
+      <div class="field"><label>Lucro desejado</label><div class="affix"><input type="text" inputmode="decimal" class="n" data-f="marg" value="${inv(p.marg)}" placeholder="${inv(P.margProd)}"><span>%</span></div><span class="hint">Vazio = padrão dos produtos (${fmt(P.margProd, 1)}%)</span></div>
+      <div class="field"><label>Perdas / vencimento</label><div class="affix"><input type="text" inputmode="decimal" class="n" data-f="perdas" value="${inv(p.perdas)}" placeholder="${inv(P.perdas)}"><span>%</span></div><span class="hint">Vazio = padrão (${fmt(P.perdas, 1)}%)</span></div>
+      <div class="field"><label>Preço praticado hoje</label><div class="affix"><span>R$</span><input type="text" inputmode="decimal" class="n" data-f="atual" value="${inv(p.atual)}"></div></div>
+      <div class="field"><label>Vendas por mês</label><input type="text" inputmode="numeric" class="n" data-f="qtd" value="${inv(p.qtd)}"></div>
+    </div>
+    <div class="result" id="mRes"></div>
+    ${hist.length ? `<div class="sub"><h3>Histórico de compras</h3><div class="tbl-wrap"><table>
+      <thead><tr><th>Data</th><th>Fornecedor</th><th>NF</th><th class="r">Custo unitário</th></tr></thead>
+      <tbody>${hist.map(h => `<tr><td class="num">${dataBR(h.nf.data)}</td><td>${esc(h.nf.forn)}</td><td>${esc(h.nf.num)}</td><td class="r num">${money(h.un)}</td></tr>`).join('')}</tbody></table></div></div>` : ''}
+    <footer><button class="btn danger" id="mDel" data-confirm="Toque de novo para excluir">Excluir produto</button><button class="btn" data-close>Concluir</button></footer>`,
+    () => updProdutos());
+  const upd = () => {
+    const b = base(), r = calcProd(p, b, custosNF());
+    $('#mRes').innerHTML = !r.ct ? `<p class="muted">Informe o custo de compra para calcular o preço.</p>` : `
+      <div class="res-head">
+        <div><div class="l">Preço sugerido</div><div class="big" style="color:var(--accent)">${money(r.sug)}</div></div>
+        <div><div class="l">Preço mínimo (lucro zero)</div><div class="v num" style="font-weight:700">${money(r.min)}</div></div>
+        <div><div class="l">Markup</div><div class="num" style="font-weight:700">${fmt(r.markup)} ×</div></div>
+        ${p.atual > 0 ? `<div><div class="l">Preço atual</div><div class="num" style="font-weight:700">${money(p.atual)} <span class="pill st-${r.st}">${ST_LABEL[r.st]}</span></div></div>` : ''}
+      </div>
+      <div class="lines">
+        <span>Custo de compra</span><span class="num">${money(r.c.v)}</span>
+        <span>Perdas / vencimento (${pct(r.perdas)})</span><span class="num">${money(r.ct - r.c.v)}</span>
+        <span class="tot">Custo total</span><span class="num tot">${money(r.ct)}</span>
+        <span>Custos fixos da clínica (${pct(b.dfProd)} do preço)</span><span class="num">${money(r.sug * b.dfProd)}</span>
+        <span>Impostos (${pct((P.impProd || 0) / 100)})</span><span class="num">${money(r.sug * (P.impProd || 0) / 100)}</span>
+        <span>Cartão e comissão (${pct(((P.cartao || 0) + (P.comissao || 0)) / 100)})</span><span class="num">${money(r.sug * ((P.cartao || 0) + (P.comissao || 0)) / 100)}</span>
+        <span class="tot">Lucro por unidade no preço sugerido</span><span class="num tot">${money(r.sug * r.lucroSug)} (${pct(r.lucroSug)})</span>
+        ${p.atual > 0 ? `<span>Lucro por unidade no preço atual</span><span class="num">${money(p.atual * r.lucroAtual)} (${pct(r.lucroAtual)})</span>` : ''}
+        <span>Margem de contribuição (sobra para pagar os fixos e dar lucro)</span><span class="num">${money(r.sug * (1 - b.varProd) - r.ct)}</span>
+      </div>`;
+  };
+  $('#sheet').addEventListener('input', e => {
+    const f = e.target.dataset.f; if (!f) return;
+    if (f === 'nome') p.nome = e.target.value;
+    else if (f === 'manual') p.manual = e.target.checked;
+    else p[f] = numOrNull(e.target.value);
+    if (f === 'custo' && hist.length) { p.manual = p.custo != null; const cb = $('#sheet [data-f="manual"]'); if (cb) cb.checked = p.manual; }
+    save(); upd();
+  });
+  $('#sheet').addEventListener('change', e => { if (e.target.dataset.f === 'manual') { p.manual = e.target.checked; save(); upd(); } });
+  $('#mDel').addEventListener('click', () => {
+    S.produtos = S.produtos.filter(x => x.id !== p.id); save(); closeModal();
+  });
+  upd();
+}
+
+/* ---------- SERVIÇOS ---------- */
+function renderServicos() {
+  $('#main').innerHTML = `
+  <div class="grid2">
+    <div class="card">
+      <div class="card-head"><h2>Margem de lucro dos serviços</h2><span class="pill" id="sSaude"></span></div>
+      <div class="fields">
+        ${pField('margServ', 'Lucro desejado sobre o preço', '%', 'Faixa saudável: 10% a 25%')}
+        ${arrSelect('arrServ')}
+      </div>
+      <div id="sResumo"></div>
+    </div>
+    <div class="card how">
+      <h3>Como o preço é calculado</h3>
+      <p>Fórmula do Sebrae para serviços:</p>
+      <div class="formula">Preço = Custo total ÷ (1 − (lucro % + impostos % + cartão %))</div>
+      <p><b>Custo total</b> = materiais e medicações + serviços de terceiros (laboratório, crematório) + <b>tempo do procedimento × custo do minuto</b>.</p>
+      <p>O custo do minuto é o valor da hora trabalhada: divide os custos fixos dos serviços (aluguel, salários, energia, pró-labore, empréstimos) pelos minutos atendidos no mês.</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="toolbar">
+      <input type="text" id="sBusca" placeholder="Buscar serviço…" value="${esc(UI.sBusca)}" aria-label="Buscar serviço">
+      <div class="chips" id="sChips"></div>
+      <span class="spacer"></span>
+      <select id="sOrdem" aria-label="Ordenar"><option value="nome">Ordem: nome</option><option value="sit">Ordem: situação</option><option value="vendas">Ordem: mais feitos</option></select>
+      <button class="btn sm" id="sNovo">+ Serviço</button>
+    </div>
+    <div class="tbl-wrap"><table>
+      <thead><tr><th>Serviço</th><th class="r">Tempo</th><th class="r">Custo total</th><th class="r">Preço mínimo</th><th class="r">Preço sugerido</th><th class="r">Preço atual</th><th class="r">Lucro no preço atual</th><th>Situação</th></tr></thead>
+      <tbody id="sBody"></tbody>
+    </table></div>
+    <p class="small muted" style="margin-top:10px">Itens marcados como <span class="badge" style="margin:0">estimado</span> estão com tempo e materiais estimados. Toque no serviço para conferir.</p>
+  </div>`;
+  $('#sOrdem').value = UI.sOrdem;
+  $('#sBusca').addEventListener('input', e => { UI.sBusca = e.target.value; updServicos(); });
+  $('#sOrdem').addEventListener('change', e => { UI.sOrdem = e.target.value; updServicos(); });
+  $('#sNovo').addEventListener('click', () => {
+    const s = { id: uid(), nome: 'Novo serviço', min: 30, qtd: 0, insumos: [], terceiros: null, atual: null };
+    S.servicos.push(s); save(); updServicos(); openServ(s.id);
+  });
+  $('#sBody').addEventListener('click', e => { const tr = e.target.closest('tr[data-id]'); if (tr) openServ(tr.dataset.id); });
+  $('#sChips').addEventListener('click', e => { const c = e.target.closest('[data-f]'); if (c) { UI.sFiltro = c.dataset.f; updServicos(); } });
+  updServicos();
+}
+function updServicos() {
+  if (TAB !== 'servicos') return;
+  const P = S.params, b = base();
+  const [cls, lab] = saude(P.margServ);
+  const sp = $('#sSaude'); sp.className = 'pill ' + cls; sp.textContent = lab;
+  const marg = (P.margServ || 0) / 100;
+  const div = 1 - (b.varServ + marg);
+  $('#sResumo').innerHTML = `
+    <div class="kpis">
+      <div class="kpi"><div class="l">Custo do minuto</div><div class="v">${money(b.custoMin)}</div></div>
+      <div class="kpi"><div class="l">Custo da hora</div><div class="v">${money(b.custoMin * 60)}</div></div>
+      <div class="kpi"><div class="l">Horas atendidas por mês</div><div class="v">${fmt(b.minutos / 60, 1)} h</div></div>
+    </div>
+    <p class="small muted" style="margin-top:8px">${money(b.fixServ)} de custos fixos dos serviços ÷ ${fmt(b.minutos / 60, 1)} h ${P.horasModo === 'manual' ? '(informadas na aba Custos)' : '(tempo de cada serviço × quantidade feita no mês)'}.</p>
+    ${div > 0 ? `<p class="small muted" style="margin-top:12px">De cada R$ 100 cobrados em serviços:</p>
+    ${compBar([['Custos (estrutura, materiais, terceiros)', div, '--s-custo'], ['Impostos', (P.impServ || 0) / 100, '--s-imp'], ['Cartão e comissão', ((P.cartao || 0) + (P.comissao || 0)) / 100, '--s-taxa'], ['Lucro', marg, '--s-lucro']])}`
+    : `<div class="alert bad">Impostos + cartão + lucro passam de 100% do preço. Reduza a margem.</div>`}`;
+  let rows = S.servicos.map(s => ({ s, r: calcServ(s, b) }));
+  const cont = { todos: rows.length, prejuizo: 0, abaixo: 0, ok: 0 };
+  rows.forEach(x => { if (x.r.st in cont) cont[x.r.st]++; });
+  $('#sChips').innerHTML = [['todos', 'Todos'], ['prejuizo', 'Prejuízo'], ['abaixo', 'Abaixo da meta'], ['ok', 'Saudáveis']]
+    .map(([k, t]) => `<button class="chip" data-f="${k}" aria-pressed="${UI.sFiltro === k}">${t} <span class="num">${cont[k]}</span></button>`).join('');
+  const q = norm(UI.sBusca);
+  if (q) rows = rows.filter(x => norm(x.s.nome).includes(q));
+  if (UI.sFiltro !== 'todos') rows = rows.filter(x => x.r.st === UI.sFiltro);
+  const byName = (a, c) => a.s.nome.localeCompare(c.s.nome, 'pt-BR');
+  rows.sort(UI.sOrdem === 'sit' ? (a, c) => ORD_ST[a.r.st] - ORD_ST[c.r.st] || byName(a, c) : UI.sOrdem === 'vendas' ? (a, c) => (c.s.qtd || 0) - (a.s.qtd || 0) || byName(a, c) : byName);
+  $('#sBody').innerHTML = rows.length ? rows.map(({ s, r }) => `
+    <tr class="click" data-id="${s.id}">
+      <td class="name">${esc(s.nome)}${s.est ? '<span class="badge">estimado</span>' : ''}<small>${s.qtd ? `${s.qtd} por mês` : ''}</small></td>
+      <td class="r num">${fmt(s.min || 0, 0)} min</td>
+      <td class="r num">${money(r.ct)}</td>
+      <td class="r num">${money(r.min)}</td>
+      <td class="r num"><span class="sug">${money(r.sug)}</span></td>
+      <td class="r num">${money(s.atual)}</td>
+      <td class="r num">${pct(r.lucroAtual)}</td>
+      <td><span class="pill st-${r.st}">${ST_LABEL[r.st]}</span></td>
+    </tr>`).join('') : `<tr><td colspan="8" class="empty">Nenhum serviço neste filtro.</td></tr>`;
+}
+function openServ(id) {
+  const s = S.servicos.find(x => x.id === id);
+  if (!s) return;
+  const P = S.params;
+  s.insumos ||= [];
+  openModal(`
+    <header><h2>Serviço</h2><button class="icon-btn" data-close aria-label="Fechar">✕</button></header>
+    <div class="fields">
+      <div class="field wide"><label>Nome</label><input type="text" data-f="nome" value="${esc(s.nome)}"></div>
+      <div class="field"><label>Tempo da equipe</label><div class="affix"><input type="text" inputmode="numeric" class="n" data-f="min" value="${inv(s.min)}"><span>min</span></div><span class="hint">Tempo de veterinário/auxiliar dedicado</span></div>
+      <div class="field"><label>Feitos por mês</label><input type="text" inputmode="numeric" class="n" data-f="qtd" value="${inv(s.qtd)}"></div>
+      <div class="field"><label>Terceiros (laboratório, crematório)</label><div class="affix"><span>R$</span><input type="text" inputmode="decimal" class="n" data-f="terceiros" value="${inv(s.terceiros)}"></div></div>
+      <div class="field"><label>Lucro desejado</label><div class="affix"><input type="text" inputmode="decimal" class="n" data-f="marg" value="${inv(s.marg)}" placeholder="${inv(P.margServ)}"><span>%</span></div><span class="hint">Vazio = padrão dos serviços (${fmt(P.margServ, 1)}%)</span></div>
+      <div class="field"><label>Preço praticado hoje</label><div class="affix"><span>R$</span><input type="text" inputmode="decimal" class="n" data-f="atual" value="${inv(s.atual)}"></div></div>
+    </div>
+    <div class="sub"><div class="card-head" style="margin-bottom:6px"><h3>Materiais e medicações usados</h3><button class="btn ghost sm" id="mAddIns">+ Item</button></div>
+      <div class="tbl-wrap"><table class="lines-tbl"><thead><tr><th>Item</th><th class="r">Qtd</th><th class="r">Custo unit.</th><th class="r">Total</th><th></th></tr></thead><tbody id="mIns"></tbody></table></div>
+      <p class="small muted" style="margin-top:6px">Escolha um produto da lista para puxar o custo da última nota fiscal.</p>
+    </div>
+    <div class="result" id="mRes"></div>
+    <footer><button class="btn danger" id="mDel" data-confirm="Toque de novo para excluir">Excluir serviço</button><button class="btn" data-close>Concluir</button></footer>`,
+    () => updServicos());
+  const map = custosNF();
+  const insRows = () => {
+    $('#mIns').innerHTML = s.insumos.length ? s.insumos.map((i, k) => `<tr>
+      <td style="min-width:180px"><input type="text" list="dlProdutos" data-i="d" data-k="${k}" value="${esc(i.d)}" aria-label="Item"></td>
+      <td style="width:70px"><input type="text" inputmode="decimal" class="n" data-i="q" data-k="${k}" value="${inv(ok(i.q) ? i.q : 1)}" aria-label="Quantidade"></td>
+      <td style="width:110px"><input type="text" inputmode="decimal" class="n" data-i="v" data-k="${k}" value="${inv(i.v)}" aria-label="Custo unitário"></td>
+      <td class="r num" id="insT${k}">${money((ok(i.q) ? i.q : 1) * (i.v || 0))}</td>
+      <td><button class="icon-btn" data-rm="${k}" aria-label="Remover">✕</button></td></tr>`).join('')
+      : `<tr><td colspan="5" class="muted small">Nenhum material lançado.</td></tr>`;
+  };
+  const upd = () => {
+    const b = base(), r = calcServ(s, b);
+    s.insumos.forEach((i, k) => { const c = $('#insT' + k); if (c) c.textContent = money((ok(i.q) ? i.q : 1) * (i.v || 0)); });
+    $('#mRes').innerHTML = `
+      <div class="res-head">
+        <div><div class="l">Preço sugerido</div><div class="big" style="color:var(--accent)">${money(r.sug)}</div></div>
+        <div><div class="l">Preço mínimo (lucro zero)</div><div class="num" style="font-weight:700">${money(r.min)}</div></div>
+        ${s.atual > 0 ? `<div><div class="l">Preço atual</div><div class="num" style="font-weight:700">${money(s.atual)} <span class="pill st-${r.st}">${ST_LABEL[r.st]}</span></div></div>` : ''}
+      </div>
+      <div class="lines">
+        <span>Estrutura e equipe (${fmt(s.min || 0, 0)} min × ${money(b.custoMin)})</span><span class="num">${money(r.estrutura)}</span>
+        <span>Materiais e medicações</span><span class="num">${money(r.insumos)}</span>
+        <span>Terceiros</span><span class="num">${money(r.terceiros)}</span>
+        <span class="tot">Custo total</span><span class="num tot">${money(r.ct)}</span>
+        <span>Impostos (${pct((P.impServ || 0) / 100)})</span><span class="num">${money(r.sug * (P.impServ || 0) / 100)}</span>
+        <span>Cartão e comissão (${pct(((P.cartao || 0) + (P.comissao || 0)) / 100)})</span><span class="num">${money(r.sug * ((P.cartao || 0) + (P.comissao || 0)) / 100)}</span>
+        <span class="tot">Lucro no preço sugerido</span><span class="num tot">${money(r.sug * r.lucroSug)} (${pct(r.lucroSug)})</span>
+        ${s.atual > 0 ? `<span>Lucro no preço atual</span><span class="num">${money(s.atual * r.lucroAtual)} (${pct(r.lucroAtual)})</span>` : ''}
+      </div>`;
+  };
+  $('#sheet').addEventListener('input', e => {
+    const t = e.target, f = t.dataset.f, ii = t.dataset.i;
+    if (f) { s[f] = f === 'nome' ? t.value : numOrNull(t.value); }
+    else if (ii) {
+      const it = s.insumos[+t.dataset.k];
+      if (ii === 'd') {
+        it.d = t.value;
+        const p = findProd(t.value);
+        const c = p && custoProd(p, map);
+        if (c) { it.v = r2(c.v); const vi = $(`#mIns [data-i="v"][data-k="${t.dataset.k}"]`); if (vi) vi.value = inv(it.v); }
+      } else it[ii] = numOrNull(t.value);
+    } else return;
+    delete s.est; save(); upd();
+  });
+  $('#mIns').addEventListener('click', e => {
+    const b = e.target.closest('[data-rm]'); if (!b) return;
+    s.insumos.splice(+b.dataset.rm, 1); delete s.est; save(); insRows(); upd();
+  });
+  $('#mAddIns').addEventListener('click', () => { s.insumos.push({ d: '', q: 1, v: null }); insRows(); const l = $$('#mIns [data-i="d"]').pop(); if (l) l.focus(); });
+  $('#mDel').addEventListener('click', () => { S.servicos = S.servicos.filter(x => x.id !== s.id); save(); closeModal(); });
+  insRows(); upd();
+}
+
+/* ---------- NOTAS DE ENTRADA ---------- */
+function findProd(nome) {
+  const n = norm(nome); if (!n) return null;
+  return S.produtos.find(p => norm(p.nome) === n || (p.aliases || []).some(a => norm(a) === n)) || null;
+}
+function renderNotas() {
+  const d = S.draft;
+  const nfs = [...S.nfs].sort((a, b) => (b.data || '').localeCompare(a.data || '') || (b.criado || 0) - (a.criado || 0));
+  const map = custosNF();
+  const comCusto = S.produtos.filter(p => custoProd(p, map)).length;
+  $('#main').innerHTML = `
+  <div class="card">
+    <div class="card-head"><h2>${d.id ? 'Editando nota fiscal' : 'Lançar nota fiscal de entrada'}</h2>
+      <div class="row">
+        <label class="btn ghost sm hide-android" for="xmlIn">Importar XML da NF-e</label>
+        <input type="file" id="xmlIn" accept=".xml,text/xml,application/xml" multiple hidden>
+        ${d.id ? '<button class="btn ghost sm" id="nfCancel">Cancelar edição</button>' : ''}
+      </div>
+    </div>
+    <div class="fields">
+      <div class="field"><label>Fornecedor</label><input type="text" list="dlForn" data-d="forn" value="${esc(d.forn)}"></div>
+      <div class="field"><label>Número da NF</label><input type="text" data-d="num" value="${esc(d.num)}"></div>
+      <div class="field"><label>Data de entrada</label><input type="date" data-d="data" value="${esc(d.data)}"></div>
+      <div class="field"><label>Frete</label><div class="affix"><span>R$</span><input type="text" inputmode="decimal" class="n" data-d="frete" value="${inv(d.frete)}"></div></div>
+      <div class="field"><label>Outras despesas (ST, IPI, seguro)</label><div class="affix"><span>R$</span><input type="text" inputmode="decimal" class="n" data-d="outras" value="${inv(d.outras)}"></div></div>
+      <div class="field"><label>Desconto na nota</label><div class="affix"><span>R$</span><input type="text" inputmode="decimal" class="n" data-d="desc" value="${inv(d.desc)}"></div></div>
+    </div>
+    <div class="sub">
+      <div class="tbl-wrap"><table class="lines-tbl">
+        <thead><tr><th>Produto</th><th class="r">Qtd comprada</th><th class="r">Valor unitário na NF</th><th class="r" title="Quantas unidades de venda saem de cada unidade comprada">Fracionar em</th><th class="r">Custo por unidade de venda</th><th></th></tr></thead>
+        <tbody id="nfItens"></tbody>
+      </table></div>
+      <div class="row" style="margin-top:10px"><button class="btn ghost sm" id="nfAdd">+ Item</button><span class="spacer"></span><span class="small muted" id="nfTot"></span></div>
+      <p class="small muted" style="margin-top:8px">Frete, outras despesas e desconto são rateados entre os itens pelo valor de cada um. Use "Fracionar em" quando comprar uma caixa e vender por unidade (ex.: caixa com 10 blisters vendidos soltos = 10).</p>
+    </div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="nfSalvar">${d.id ? 'Salvar alterações' : 'Salvar nota e atualizar custos'}</button><button class="btn ghost" id="nfLimpar" data-confirm="Toque de novo para limpar">Limpar</button></div>
+    <div class="msg" id="nfMsg"></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>Notas lançadas</h2><span class="small muted">${S.nfs.length} notas · ${comCusto} de ${S.produtos.length} produtos com custo</span></div>
+    <div class="nf-list">${nfs.length ? nfs.map(nf => { const c = nfCalc(nf); return `
+      <div class="nf">
+        <div style="flex:1;min-width:200px"><b>${esc(nf.forn || 'Sem fornecedor')}</b> <span class="muted small">NF ${esc(nf.num || '—')} · ${dataBR(nf.data)}</span>
+          <div class="small muted">${nf.itens.length} ${nf.itens.length === 1 ? 'item' : 'itens'}: ${esc(nf.itens.slice(0, 3).map(i => i.nome).join(', '))}${nf.itens.length > 3 ? '…' : ''}</div></div>
+        <span class="num"><b>${money(c.total)}</b></span>
+        <button class="btn ghost sm" data-ed="${nf.id}">Editar</button>
+        <button class="btn danger sm" data-del="${nf.id}" data-confirm="Excluir?">Excluir</button>
+      </div>`; }).join('') : '<p class="muted small">Nenhuma nota lançada ainda. Os custos dos produtos aparecem assim que você lançar as notas de entrada.</p>'}</div>
+  </div>`;
+  nfItens();
+  const main = $('#main');
+  main.querySelectorAll('[data-d]').forEach(el => el.addEventListener('input', () => {
+    const k = el.dataset.d; d[k] = ['forn', 'num', 'data'].includes(k) ? el.value : numOrNull(el.value); save(); nfUpd();
+  }));
+  $('#nfAdd').addEventListener('click', () => { d.itens.push({ nome: '', q: null, vu: null, fator: 1 }); save(); nfItens(); const l = $$('#nfItens [data-n="nome"]').pop(); if (l) l.focus(); });
+  $('#nfItens').addEventListener('input', e => {
+    const t = e.target, k = t.dataset.n; if (!k) return;
+    const it = d.itens[+t.dataset.k];
+    it[k] = k === 'nome' ? t.value : numOrNull(t.value);
+    save(); nfUpd();
+  });
+  $('#nfItens').addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) { d.itens.splice(+b.dataset.rm, 1); if (!d.itens.length) d.itens.push({ nome: '', q: null, vu: null, fator: 1 }); save(); nfItens(); } });
+  $('#nfSalvar').addEventListener('click', salvarNF);
+  $('#nfLimpar').addEventListener('click', () => { S.draft = emptyDraft(); save(); renderNotas(); });
+  const cancel = $('#nfCancel'); if (cancel) cancel.addEventListener('click', () => { S.draft = emptyDraft(); save(); renderNotas(); });
+  $('#xmlIn').addEventListener('change', importXML);
+  main.querySelectorAll('[data-ed]').forEach(b => b.addEventListener('click', () => {
+    const nf = S.nfs.find(n => n.id === b.dataset.ed);
+    S.draft = JSON.parse(JSON.stringify(nf)); save(); renderNotas(); window.scrollTo(0, 0);
+  }));
+  main.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => {
+    S.nfs = S.nfs.filter(n => n.id !== b.dataset.del); if (S.draft.id === b.dataset.del) S.draft = emptyDraft(); save(); renderNotas();
+  }));
+}
+function nfItens() {
+  const d = S.draft;
+  $('#nfItens').innerHTML = d.itens.map((i, k) => `<tr>
+    <td style="min-width:220px"><input type="text" list="dlProdutos" data-n="nome" data-k="${k}" value="${esc(i.nome)}" placeholder="Nome do produto" aria-label="Produto"><small id="nfS${k}" class="muted"></small></td>
+    <td style="width:90px"><input type="text" inputmode="decimal" class="n" data-n="q" data-k="${k}" value="${inv(i.q)}" aria-label="Quantidade"></td>
+    <td style="width:120px"><div class="affix"><span>R$</span><input type="text" inputmode="decimal" class="n" data-n="vu" data-k="${k}" value="${inv(i.vu)}" aria-label="Valor unitário"></div></td>
+    <td style="width:80px"><input type="text" inputmode="numeric" class="n" data-n="fator" data-k="${k}" value="${inv(i.fator)}" aria-label="Fracionar em"></td>
+    <td class="r num" id="nfU${k}"></td>
+    <td><button class="icon-btn" data-rm="${k}" aria-label="Remover item">✕</button></td></tr>`).join('');
+  nfUpd();
+}
+function nfUpd() {
+  const d = S.draft, c = nfCalc(d);
+  c.linhas.forEach((l, k) => {
+    const u = $('#nfU' + k); if (u) u.textContent = money(l.un);
+    const st = $('#nfS' + k);
+    if (st) {
+      const nomeNF = l.nomeNF && norm(l.nomeNF) !== norm(l.nome) ? `Na NF: ${l.nomeNF}. ` : '';
+      st.textContent = !l.nome.trim() ? nomeNF : nomeNF + (findProd(l.nome) ? '✓ Produto cadastrado' : 'Produto novo: será criado');
+    }
+  });
+  $('#nfTot').textContent = `Produtos ${money(c.bruto)} · Total da nota ${money(c.total)}`;
+}
+function salvarNF() {
+  const d = S.draft, msg = $('#nfMsg');
+  const itens = d.itens.filter(i => (i.nome || '').trim() || i.q || i.vu);
+  const ruim = itens.find(i => !(i.nome || '').trim() || !(i.q > 0) || !(i.vu > 0));
+  if (!itens.length || ruim) { msg.className = 'msg bad'; msg.textContent = !itens.length ? 'Adicione pelo menos um item.' : `Confira o item "${ruim.nome || 'sem nome'}": precisa de nome, quantidade e valor unitário.`; return; }
+  let novos = 0;
+  const out = itens.map(i => {
+    const nome = i.nome.trim();
+    let p = findProd(nome) || (i.nomeNF ? findProd(i.nomeNF) : null);
+    if (!p) { p = { id: uid(), nome, qtd: 0, atual: null }; S.produtos.push(p); novos++; }
+    if (i.nomeNF && norm(i.nomeNF) !== norm(p.nome)) { p.aliases ||= []; if (!p.aliases.some(a => norm(a) === norm(i.nomeNF))) p.aliases.push(i.nomeNF); }
+    if (p.manual) delete p.manual;
+    return { prod: p.id, nome: p.nome, nomeNF: i.nomeNF || '', q: i.q, vu: i.vu, fator: i.fator > 0 ? i.fator : 1 };
+  });
+  const nf = { id: d.id || uid(), criado: d.criado || Date.now(), forn: d.forn.trim(), num: String(d.num || '').trim(), data: d.data || today(), frete: d.frete, outras: d.outras, desc: d.desc, itens: out };
+  const ix = S.nfs.findIndex(n => n.id === nf.id);
+  if (ix > -1) S.nfs[ix] = nf; else S.nfs.push(nf);
+  S.draft = emptyDraft(); save(); refreshDatalists(); renderNotas();
+  const m = $('#nfMsg'); m.className = 'msg ok';
+  m.textContent = `Nota ${nf.num || ''} salva: ${out.length} ${out.length === 1 ? 'custo atualizado' : 'custos atualizados'}${novos ? `, ${novos} ${novos === 1 ? 'produto novo criado' : 'produtos novos criados'}` : ''}. Veja os preços na aba Produtos.`;
+}
+function parseNFe(text) {
+  const doc = new DOMParser().parseFromString(text, 'application/xml');
+  if (doc.getElementsByTagName('parsererror').length) throw new Error('arquivo não é um XML válido');
+  const g = (el, tag) => { const x = el && el.getElementsByTagName(tag)[0]; return x ? x.textContent.trim() : ''; };
+  const f = (el, tag) => parseFloat(g(el, tag)) || 0;
+  const ide = doc.getElementsByTagName('ide')[0], emit = doc.getElementsByTagName('emit')[0], tot = doc.getElementsByTagName('ICMSTot')[0];
+  const dets = [...doc.getElementsByTagName('det')];
+  if (!dets.length) throw new Error('nenhum produto encontrado no XML');
+  const itens = dets.map(det => {
+    const p = det.getElementsByTagName('prod')[0];
+    const nomeNF = g(p, 'xProd');
+    const prod = findProd(nomeNF);
+    return { nome: prod ? prod.nome : nomeNF, nomeNF, q: f(p, 'qCom'), vu: f(p, 'vUnCom'), fator: 1 };
+  });
+  return {
+    forn: g(emit, 'xFant') || g(emit, 'xNome'), num: g(ide, 'nNF'), data: (g(ide, 'dhEmi') || g(ide, 'dEmi') || today()).slice(0, 10),
+    frete: f(tot, 'vFrete') || null, outras: (f(tot, 'vST') + f(tot, 'vIPI') + f(tot, 'vOutro') + f(tot, 'vSeg') + f(tot, 'vFCPST')) || null, desc: f(tot, 'vDesc') || null, itens
+  };
+}
+async function importXML(e) {
+  const files = [...e.target.files]; e.target.value = '';
+  const msg = $('#nfMsg');
+  const lidas = [];
+  for (const file of files) {
+    try { lidas.push(parseNFe(await file.text())); }
+    catch (err) { msg.className = 'msg bad'; msg.textContent = `${file.name}: ${err.message}.`; return; }
+  }
+  if (!lidas.length) return;
+  if (lidas.length === 1) {
+    S.draft = lidas[0]; save(); renderNotas();
+    const m = $('#nfMsg'); m.className = 'msg ok';
+    m.textContent = 'XML importado. Confira os nomes dos produtos (escolha o produto da clínica correspondente), ajuste "Fracionar em" e salve.';
+  } else {
+    for (const nf of lidas) {
+      nf.itens = nf.itens.map(i => { let p = findProd(i.nome) || findProd(i.nomeNF); if (!p) { p = { id: uid(), nome: i.nome, qtd: 0, atual: null }; S.produtos.push(p); } return { ...i, prod: p.id, nome: p.nome }; });
+      S.nfs.push({ id: uid(), criado: Date.now(), ...nf });
+    }
+    save(); refreshDatalists(); renderNotas();
+    const m = $('#nfMsg'); m.className = 'msg ok';
+    m.textContent = `${lidas.length} notas importadas e salvas. Use "Editar" para ajustar fracionamento ou nomes.`;
+  }
+}
+
+/* ---------- CUSTOS DA CLÍNICA ---------- */
+function renderCustos() {
+  const P = S.params;
+  $('#main').innerHTML = `
+  <div class="card">
+    <div class="card-head"><h2>Saúde financeira do mês</h2><span class="small muted">Base: custos lançados abaixo e faturamento médio</span></div>
+    <div class="kpis" id="cKpis"></div>
+    <div id="cAlert"></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>Parâmetros do cálculo</h2></div>
+    <div class="fields">
+      ${pField('fat', 'Faturamento médio mensal', 'R$', 'Sua planilha: mês anterior R$ 34.064,88')}
+      ${pField('partProd', 'Parte do faturamento que vem de produtos', '%', 'Pela aba Faturamento da planilha: 32,3%')}
+      ${pField('fixProd', 'Custos fixos atribuídos aos produtos', '%', '', { hintId: 'hFixProd' })}
+      ${pField('impServ', 'Impostos sobre serviços', '%', '', { hintId: 'hImp' })}
+      ${pField('impProd', 'Impostos sobre produtos', '%', 'Simples Nacional sobre venda de mercadorias')}
+      ${pField('cartao', 'Taxa média de cartão', '%', '', { hintId: 'hCartao' })}
+      ${pField('comissao', 'Comissão sobre vendas', '%', 'Deixe 0 se não paga comissão')}
+      ${pField('perdas', 'Perdas e vencimento de produtos', '%', 'Somado ao custo de compra')}
+      <div class="field"><label>Horas atendidas por mês</label><select data-p="horasModo">
+        <option value="auto"${P.horasModo !== 'manual' ? ' selected' : ''}>Calcular pelos serviços (tempo × quantidade)</option>
+        <option value="manual"${P.horasModo === 'manual' ? ' selected' : ''}>Informar manualmente</option></select>
+        <span class="hint" id="hHoras"></span></div>
+      ${pField('horasManual', 'Horas manuais (se escolhido)', 'h', '')}
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>Custos do mês</h2>
+      <div class="row"><button class="btn ghost sm" id="cColar">Colar do Excel</button><button class="btn sm" id="cAdd">+ Custo</button></div></div>
+    <div id="cPaste" hidden style="margin-bottom:14px">
+      <textarea id="cPasteTxt" rows="6" placeholder="Copie as colunas Origem do Boleto e Valor no Excel e cole aqui"></textarea>
+      <div class="row" style="margin-top:8px"><button class="btn sm" id="cPasteAdd">Adicionar à lista</button><button class="btn danger sm" id="cPasteRep" data-confirm="Apagar a lista atual e colar?">Substituir a lista</button><span class="small muted">O tipo é sugerido pelo nome; confira depois.</span></div>
+    </div>
+    <div id="cTot" class="kpis" style="margin:0 0 14px"></div>
+    <div class="tbl-wrap"><table class="lines-tbl">
+      <thead><tr><th>Origem</th><th class="r">Valor</th><th>Tipo</th><th>Venc.</th><th></th></tr></thead>
+      <tbody id="cBody"></tbody>
+    </table></div>
+    <p class="small muted" style="margin-top:8px"><b>Custos fixos</b>, empréstimos e pró-labore são divididos entre produtos e serviços. <b>Compras de mercadoria</b> não entram no rateio: o custo delas chega pelo preço de compra de cada produto (notas de entrada). Impostos e cartão entram como percentual sobre o preço.</p>
+  </div>
+  <div class="card">
+    <div class="card-head"><h2>Backup dos dados</h2></div>
+    <p class="small muted">Os dados ficam salvos neste aparelho${PLAT === 'windows' ? ' (pasta %APPDATA%\\VetClin Preco de Venda)' : ''}. Para levar para outro aparelho, gere o backup, copie o texto e cole no outro.</p>
+    <div class="row" style="margin-top:10px">
+      <button class="btn sm" id="bkGen">Gerar backup e copiar</button>
+      ${PLAT === 'windows' ? '<button class="btn ghost sm" id="bkFile">Salvar backup em Documentos</button>' : ''}
+      <button class="btn ghost sm" id="bkLoad" data-confirm="Substituir tudo pelo backup?">Restaurar do texto abaixo</button>
+      <span class="spacer"></span>
+      <button class="btn danger sm" id="bkReset" data-confirm="Apagar tudo e voltar à planilha?">Voltar aos dados da planilha</button>
+    </div>
+    <textarea id="bkText" rows="4" style="margin-top:10px" placeholder="O backup aparece aqui. Para restaurar, cole o texto do backup aqui."></textarea>
+    <div class="msg" id="bkMsg"></div>
+  </div>`;
+  cList(); updCustos();
+  $('#cAdd').addEventListener('click', () => { S.custos.push({ id: uid(), nome: '', valor: null, tipo: 'fixo' }); save(); cList(); updCustos(); const l = $$('#cBody [data-c="nome"]').pop(); if (l) l.focus(); });
+  $('#cColar').addEventListener('click', () => { const b = $('#cPaste'); b.hidden = !b.hidden; if (!b.hidden) $('#cPasteTxt').focus(); });
+  $('#cPasteAdd').addEventListener('click', () => colar(false));
+  $('#cPasteRep').addEventListener('click', () => colar(true));
+  const body = $('#cBody');
+  body.addEventListener('input', e => {
+    const t = e.target, k = t.dataset.c; if (!k) return;
+    const c = S.custos.find(x => x.id === t.closest('tr').dataset.id);
+    c[k] = k === 'valor' ? numOrNull(t.value) : t.value;
+    if (c.conferir) { delete c.conferir; const bd = t.closest('tr').querySelector('.badge'); if (bd) bd.remove(); }
+    save(); updCustos();
+  });
+  body.addEventListener('change', e => { if (e.target.dataset.c === 'tipo') { const c = S.custos.find(x => x.id === e.target.closest('tr').dataset.id); c.tipo = e.target.value; delete c.conferir; save(); updCustos(); } });
+  body.addEventListener('click', e => { const b = e.target.closest('[data-rm]'); if (b) { S.custos = S.custos.filter(x => x.id !== b.dataset.rm); save(); cList(); updCustos(); } });
+  $('#bkGen').addEventListener('click', async () => {
+    const t = $('#bkText'); t.value = JSON.stringify(S); t.select();
+    let copiado = false;
+    try { await navigator.clipboard.writeText(t.value); copiado = true; } catch (e) { try { copiado = document.execCommand('copy'); } catch (e2) { } }
+    const m = $('#bkMsg'); m.className = 'msg ok'; m.textContent = copiado ? 'Backup copiado. Cole em um e-mail, WhatsApp ou bloco de notas para guardar.' : 'Backup gerado. Selecione o texto e copie.';
+  });
+  const bf = $('#bkFile');
+  if (bf) bf.addEventListener('click', async () => {
+    const m = $('#bkMsg');
+    try { const p = await window.vcExport(JSON.stringify(S)); m.className = 'msg ok'; m.textContent = 'Backup salvo em ' + p; }
+    catch (e) { m.className = 'msg bad'; m.textContent = 'Não foi possível salvar: ' + e; }
+  });
+  $('#bkLoad').addEventListener('click', () => {
+    const m = $('#bkMsg');
+    try { const o = JSON.parse($('#bkText').value); if (!o || o.v !== 2) throw 0; S = migrate(o); save(); refreshDatalists(); renderCustos(); const m2 = $('#bkMsg'); m2.className = 'msg ok'; m2.textContent = 'Backup restaurado.'; }
+    catch (e) { m.className = 'msg bad'; m.textContent = 'Texto de backup inválido. Cole o texto completo gerado pelo botão "Gerar backup".'; }
+  });
+  $('#bkReset').addEventListener('click', () => { S = fresh(); save(); refreshDatalists(); renderCustos(); });
+}
+function cList() {
+  $('#cBody').innerHTML = S.custos.length ? S.custos.map(c => `<tr data-id="${c.id}">
+    <td style="min-width:200px"><input type="text" data-c="nome" value="${esc(c.nome)}" aria-label="Origem">${c.conferir ? '<span class="badge" style="margin:4px 0 0;display:inline-block">confira o tipo</span>' : ''}</td>
+    <td style="width:130px"><div class="affix"><span>R$</span><input type="text" inputmode="decimal" class="n" data-c="valor" value="${inv(c.valor)}" aria-label="Valor"></div></td>
+    <td style="min-width:200px"><select data-c="tipo" aria-label="Tipo">${Object.entries(TIPOS).map(([k, t]) => `<option value="${k}"${c.tipo === k ? ' selected' : ''}>${t}</option>`).join('')}</select></td>
+    <td style="width:80px"><input type="text" data-c="venc" value="${esc(c.venc || '')}" aria-label="Vencimento"></td>
+    <td><button class="icon-btn" data-rm="${c.id}" aria-label="Remover">✕</button></td></tr>`).join('')
+    : '<tr><td colspan="5" class="empty">Nenhum custo lançado.</td></tr>';
+}
+function adivinhaTipo(n) {
+  n = norm(n);
+  if (/EMPREST|FINANC|MAQUINARIO|PARCELA/.test(n)) return 'divida';
+  if (/PRO.?LABORE|RETIRADA/.test(n)) return 'prolabore';
+  if (/MERCADO ?PAGO|CIELO|STONE|PAGSEGURO|REDE|GETNET|SUMUP|TON\b|MAQUININHA|CARTAO/.test(n)) return 'cartao';
+  if (/SIMPLES|IMPOSTO|\bDAS\b|ISS|ICMS/.test(n)) return 'imposto';
+  if (/ALUGUEL|SALARIO|FGTS|INSS|ENERGIA|LUZ|AGUA|INTERNET|TELEFONE|CONTAB|ADVOG|SISTEMA|SOFTWARE|LIMPEZA|SEGURO|CONDOMINIO|IPTU|FILTRO|COLETA|RESIDUO/.test(n)) return 'fixo';
+  return 'mercadoria';
+}
+function colar(substituir) {
+  const linhas = $('#cPasteTxt').value.split(/\r?\n/).map(l => l.split(/\t|;/)).filter(c => c[0] && c[0].trim());
+  const novos = [];
+  for (const c of linhas) {
+    const nome = c[0].trim(); const valor = num(c[1]);
+    if (!ok(valor)) continue;
+    novos.push({ id: uid(), nome, valor: r2(valor), tipo: adivinhaTipo(nome), conferir: true, venc: c[2] ? String(c[2]).trim().slice(0, 5) : '' });
+  }
+  const m = novos.length;
+  if (!m) { $('#cPasteTxt').placeholder = 'Nada reconhecido. Cole duas colunas: nome e valor.'; $('#cPasteTxt').value = ''; return; }
+  S.custos = substituir ? novos : S.custos.concat(novos);
+  save(); $('#cPasteTxt').value = ''; $('#cPaste').hidden = true; cList(); updCustos();
+}
+function updCustos() {
+  if (TAB !== 'custos') return;
+  const P = S.params, b = base();
+  const pesoFixo = b.fat > 0 ? b.fixos / b.fat : null;
+  const margMeta = ((P.partProd || 0) * (P.margProd || 0) + (100 - (P.partProd || 0)) * (P.margServ || 0)) / 10000;
+  const fatMeta = b.mc - margMeta > 0 ? b.fixos / (b.mc - margMeta) : null;
+  const seg = b.pe && b.fat ? (b.fat - b.pe) / b.fat : null;
+  const kl = (v, bom, ruim) => v == null ? '' : v <= bom ? 'ok' : v <= ruim ? 'warn' : 'bad';
+  $('#cKpis').innerHTML = `
+    <div class="kpi"><div class="l">Custos fixos do mês</div><div class="v">${money(b.fixos)}</div><div class="l">com empréstimos e pró-labore</div></div>
+    <div class="kpi ${kl(pesoFixo, .40, .50)}"><div class="l">Peso dos fixos no faturamento</div><div class="v">${pct(pesoFixo)}</div><div class="l">Sebrae recomenda 30% a 40%</div></div>
+    <div class="kpi"><div class="l">Ponto de equilíbrio</div><div class="v">${money(b.pe)}</div><div class="l">faturamento mínimo para não ter prejuízo</div></div>
+    <div class="kpi ${seg == null ? '' : seg >= .2 ? 'ok' : seg >= 0 ? 'warn' : 'bad'}"><div class="l">Margem de segurança</div><div class="v">${pct(seg)}</div><div class="l">quanto o faturamento está acima do equilíbrio</div></div>
+    <div class="kpi"><div class="l">Faturamento para atingir as margens</div><div class="v">${money(fatMeta)}</div><div class="l">lucro médio de ${pct(margMeta)}</div></div>
+    <div class="kpi"><div class="l">Margem de contribuição média</div><div class="v">${pct(b.mc)}</div><div class="l">sobra das vendas após custos variáveis</div></div>`;
+  let al = '';
+  if (pesoFixo > .40) {
+    const div = b.soma('divida'), pl = b.soma('prolabore');
+    al = `<div class="alert ${pesoFixo > .5 ? 'bad' : 'warn'}"><b>Os custos fixos pesam ${pct(pesoFixo)} do faturamento</b>, acima dos 30% a 40% que o Sebrae recomenda. Desse total, ${money(div)} são empréstimos e financiamentos e ${money(pl)} é pró-labore. Para equilibrar: aumentar o volume de atendimentos, rever gastos ou renegociar dívidas. Subir todos os preços na mesma proporção costuma afastar clientes.</div>`;
+  } else if (pesoFixo != null) al = `<div class="alert ok">Os custos fixos estão dentro da faixa recomendada pelo Sebrae (30% a 40% do faturamento).</div>`;
+  if (b.fat > 0 && b.pe > b.fat) al += `<div class="alert bad">O faturamento médio (${money(b.fat)}) está abaixo do ponto de equilíbrio (${money(b.pe)}): a clínica fecha o mês no prejuízo.</div>`;
+  $('#cAlert').innerHTML = al;
+  const tipos = Object.keys(TIPOS).filter(t => t !== 'ignorar');
+  $('#cTot').innerHTML = tipos.map(t => `<div class="kpi"><div class="l">${TIPOS[t]}</div><div class="v" style="font-size:1rem">${money(b.soma(t))}</div></div>`).join('');
+  const h = id => $('#' + id);
+  if (h('hFixProd')) h('hFixProd').textContent = `= ${money(b.fixProd)}, ou ${pct(b.dfProd)} do preço dos produtos. O resto (${money(b.fixServ)}) vai para os serviços pelo tempo de cada um.`;
+  if (h('hImp')) h('hImp').textContent = `O boleto do Simples deste mês (${money(b.soma('imposto'))}) é ${pct(b.fat ? b.soma('imposto') / b.fat : null)} do faturamento. Confirme a alíquota com a contabilidade.`;
+  if (h('hCartao')) h('hCartao').textContent = `Taxas de maquininha lançadas ÷ faturamento = ${pct(b.fat ? b.soma('cartao') / b.fat : null, 2)}`;
+  if (h('hHoras')) h('hHoras').textContent = `Pelos serviços: ${fmt(b.minAuto / 60, 1)} h/mês → hora de ${money(b.minAuto ? b.fixServ / b.minAuto * 60 : null)}`;
+}
+
+/* ---------- início ---------- */
+(async function init() {
+  S = await load();
+  setSaved('Tudo salvo');
+  refreshDatalists();
+  let t = 'produtos'; try { t = localStorage.getItem(KEY + '-tab') || t; } catch (e) { }
+  show(['produtos', 'servicos', 'notas', 'custos'].includes(t) ? t : 'produtos');
 })();
 </script>
-<!-- ARTIFACT:BODY-END -->
 </body>
 </html>

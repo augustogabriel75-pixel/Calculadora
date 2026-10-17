@@ -1,4 +1,4 @@
-.class public Lbr/com/vetclin/precificacao/MainActivity;
+.class public Lbr/com/vetclin/precovenda/MainActivity;
 .super Landroid/app/Activity;
 .source "MainActivity.java"
 
@@ -18,7 +18,7 @@
 
     new-instance v0, Landroid/webkit/WebView;
     invoke-direct {v0, p0}, Landroid/webkit/WebView;-><init>(Landroid/content/Context;)V
-    iput-object v0, p0, Lbr/com/vetclin/precificacao/MainActivity;->web:Landroid/webkit/WebView;
+    iput-object v0, p0, Lbr/com/vetclin/precovenda/MainActivity;->web:Landroid/webkit/WebView;
 
     invoke-virtual {v0}, Landroid/webkit/WebView;->getSettings()Landroid/webkit/WebSettings;
     move-result-object v1
@@ -41,7 +41,7 @@
 
 .method protected onDestroy()V
     .registers 2
-    iget-object v0, p0, Lbr/com/vetclin/precificacao/MainActivity;->web:Landroid/webkit/WebView;
+    iget-object v0, p0, Lbr/com/vetclin/precovenda/MainActivity;->web:Landroid/webkit/WebView;
     if-eqz v0, :done
     invoke-virtual {v0}, Landroid/webkit/WebView;->destroy()V
     :done
